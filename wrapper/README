@@ -1,0 +1,17 @@
+Wrapper modules:
+
+These perl script have the main purpose to translate the raw data in an intellegible form, siutable for the forensics practitioner.
+
+1) wrapper_simple.pl
+It translates all the standard data by creating an xml file that it can be seen in any web browser.
+usage => "perl wrapper_simple.pl file_in.xml"
+The output file will be "file_in.out.xml"
+
+
+2) wrapper_dom.pl
+it translates all the standard data and non standard data. For the latter only the header is translated, being unknown the
+coding for nonstandard elementary files.
+usage => "perl wrapper_dom.pl file_in.xml"
+As output it will have "file_in.out.xml", representing the translation according with the DOM (Document Object Model) standard,
+and "fat_file_in.txt", representing the "File Allocation Table" related with the SIM/USIM card.
+

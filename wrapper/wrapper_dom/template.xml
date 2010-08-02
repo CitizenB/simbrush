@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xsl:stylesheet version="1.0"
+xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+<xsl:template match="/">
+  <html>
+    <body>
+        <h2>MF</h2>
+        <table border="1">
+        <xsl:for-each select="simcard/mf">
+            <tr>
+                <th align="left">Header MF</th>
+                <td><xsl:value-of select="./header"/></td>
+            </tr>
+            <tr>
+                <th align="left">New Header MF</th>
+                <td><xsl:value-of select="./new_header_df"/></td>
+            </tr>
+        </xsl:for-each>
+        </table>
+        <h2>Elementary File of MF</h2>
+        <table border="1">
+        <xsl:for-each select="simcard/mf/ef">
+            <tr>
+                <th align="left">Header EF</th>
+                <td><xsl:value-of select="./header"/></td>
+            </tr>
+            <xsl:choose>
+                    <xsl:when test="./body/content">
+                        <tr bgcolor="#cccccc">
+                            <th align="left">Content</th>
+                            <td><xsl:value-of select="./body/content"/></td>
+                        </tr>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <tr bgcolor="#cccccc">
+                            <th align="left">Content</th>
+                            <td><xsl:value-of select="./body/record/content"/></td>
+                        </tr>
+                    </xsl:otherwise>
+            </xsl:choose>
+            <tr>
+                <th align="left">Description</th>
+                <td><xsl:value-of select="./description"/></td>
+            </tr>
+            <tr>
+                <th align="left">New Header</th>
+                <td><xsl:value-of select="./new_header"/></td>
+            </tr>
+            <tr>
+                <th align="left">New Content</th>
+                <td>
+                <xsl:for-each select="new_content">          
+                    <xsl:if test=". != 'Empty'">
+                        <xsl:value-of select="."/>
+                    </xsl:if>
+                </xsl:for-each>
+                </td>
+                </tr>
+        </xsl:for-each>
+        </table>
+        <h2>Elementary File of df</h2>
+        <table border="1">
+        <xsl:for-each select="simcard/mf/df/ef">
+                <tr>
+                    <th align="left">Header EF</th>
+                    <td><xsl:value-of select="./header"/></td>
+                </tr>
+                <xsl:choose>
+                    <xsl:when test="./body/content">
+                        <tr bgcolor="#cccccc">
+                            <th align="left">Content</th>
+                            <td><xsl:value-of select="./body/content"/></td>
+                        </tr>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <tr bgcolor="#cccccc">
+                            <th align="left">Content</th>
+                            <td><xsl:value-of select="./body/record/content"/></td>
+                        </tr>
+                    </xsl:otherwise>
+                </xsl:choose>
+                <tr>
+                    <th align="left">Description</th>
+                    <td><xsl:value-of select="./description"/></td>
+                </tr>
+                <tr>
+                    <th align="left">New Header</th>
+                    <td><xsl:value-of select="./new_header"/></td>
+                </tr>
+                <tr>
+                <th align="left">New Content</th>
+                <td>
+                <xsl:for-each select="new_content">          
+                    <xsl:if test=". != 'Empty'">
+                        <xsl:value-of select="."/>
+                    </xsl:if>
+                </xsl:for-each>
+                </td>
+                </tr>
+        </xsl:for-each>
+        </table>
+        <h2>Elementary File of df of df</h2>
+        <table border="1">
+        <xsl:for-each select="simcard/mf/df/df/ef">
+                <tr>
+                    <th align="left">Header EF</th>
+                    <td><xsl:value-of select="./header"/></td>
+                </tr>
+                <xsl:choose>
+                    <xsl:when test="./body/content">
+                        <tr bgcolor="#cccccc">
+                            <th align="left">Content</th>
+                            <td><xsl:value-of select="./body/content"/></td>
+                        </tr>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <tr bgcolor="#cccccc">
+                            <th align="left">Content</th>
+                            <td><xsl:value-of select="./body/record/content"/></td>
+                        </tr>
+                    </xsl:otherwise>
+                </xsl:choose>
+                <tr>
+                    <th align="left">Description</th>
+                    <td><xsl:value-of select="./description"/></td>
+                </tr>
+                <tr>
+                    <th align="left">New Header</th>
+                    <td><xsl:value-of select="./new_header"/></td>
+                </tr>
+                <tr>
+                <th align="left">New Content</th>
+                <td>
+                <xsl:for-each select="new_content">          
+                    <xsl:if test=". != 'Empty'">
+                        <xsl:value-of select="."/>
+                    </xsl:if>
+                </xsl:for-each>
+                </td>
+                </tr>
+        </xsl:for-each>
+        </table>
+    </body>
+  </html>
+</xsl:template>
+</xsl:stylesheet>
