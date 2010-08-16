@@ -230,39 +230,39 @@ int print_auth_code_status(SCARDHANDLE hCard,
 		   blist_get_element(resp,16));
 
     	printf("\nCHV1 STATUS (PIN1)\t\t=\t");
-    	app = 128; //binary value of this mask = 10000000
+    	app = 0x80; //binary value of this mask = 10000000
     	if(blist_get_element(resp,18) & app) 
 		    printf("INITIALIZED,\t");
     	else printf("DEACTIVATED,\t");
-    	app = 15; //binary value of this mask = 00001111
+    	app = 0x0f; //binary value of this mask = 00001111
     	printf("TRIES LEFT = %i\n", blist_get_element(resp,18) & app);
 
     	printf("\nUNBLOCK CHV1 STATUS (PUK1)\t=\t");
-    	app = 128; //binary value of this mask = 10000000
+    	app = 0x80; //binary value of this mask = 10000000
     	if(blist_get_element(resp,19) & app) 
 		    printf("INITIALIZED,\t");
     	else printf("DEACTIVATED,\t");
-    	app = 15; //binary value of this mask = 00001111
+    	app = 0x0f; //binary value of this mask = 00001111
     	printf("TRIES LEFT = %i\n", blist_get_element(resp,19) & app);
 
     	printf("\nCHV2 STATUS (PIN2)\t\t=\t");
-    	app = 128; //binary value of this mask = 10000000
+    	app = 0x80; //binary value of this mask = 10000000
     	if(blist_get_element(resp,20) & app) 
 		    printf("INITIALIZED,\t");
     	else printf("DEACTIVATED,\t");
-    	app = 15; //binary value of this mask = 00001111
+    	app = 0x0f; //binary value of this mask = 00001111
     	printf("TRIES LEFT = %i\n", blist_get_element(resp,20) & app);
 
     	printf("\nUNBLOCK CHV2 STATUS (PUK2)\t=\t");
-    	app = 128; //binary value of this mask = 10000000
+    	app = 0x80; //binary value of this mask = 10000000
     	if(blist_get_element(resp,21) & app) 
 		    printf("INITIALIZED,\t");
     	else printf("DEACTIVATED,\t");
-    	app = 15; //binary value of this mask = 00001111
+    	app = 0x0f; //binary value of this mask = 00001111
     	printf("TRIES LEFT = %i\n", blist_get_element(resp,21) & app);
 
     	printf("\nCHV1 abilitation state is:\t");
-    	app = 128; //binary value of this mask = 10000000
+    	app = 0x80; //binary value of this mask = 10000000
     	if(blist_get_element(resp,13) & app) {
       		printf("DISABLED\n");
       		return(0);

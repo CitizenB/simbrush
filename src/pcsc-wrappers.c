@@ -3,10 +3,10 @@
  * NAME:          pcsc-wrappers.c
  *
  * AUTHORS:       Fabio Casadei
- *		  fabio.casadei@mercurio-ws.com
+ *                fabio.casadei@mercurio-ws.com
  *
- *		  Antonio Savoldi
- *		  antonio.savoldi@ing.unibs.it	
+ *                Antonio Savoldi
+ *                antonio.savoldi@ing.unibs.it
  *
  * FILE TYPE:     C source file
  *
@@ -15,7 +15,10 @@
  *
  *****************************************************************************/
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 #include "utils.h"
 #include "gsm-constants.h"
 #include "pcsc-wrappers.h"
@@ -48,18 +51,18 @@ SCARDCONTEXT SIM_Establish_Context(DWORD dwScope) {
   rv = SCardEstablishContext(dwScope, NULL, NULL, &hContext);
 
   switch (rv) {
-  case SCARD_E_INVALID_VALUE: {
-    perror(strcat("SIM_Establish_Context:",ERR_INVALID_SCOPE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_S_SUCCESS: {
-    printf("Context has been successfully established.\n");
-    return(hContext);
-  }
-  default: {
-    perror(strcat("SIM_Establish_Context:",ERR_WRONG_RETURN_VALUE));
-    exit(EXIT_FAILURE);
-  }
+    case SCARD_E_INVALID_VALUE: {
+      perror(strcat("SIM_Establish_Context:",ERR_INVALID_SCOPE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_S_SUCCESS: {
+      printf("Context has been successfully established.\n");
+      return(hContext);
+    }
+    default: {
+      perror(strcat("SIM_Establish_Context:",ERR_WRONG_RETURN_VALUE));
+      exit(EXIT_FAILURE);
+    }
   }
 
 }
@@ -83,18 +86,18 @@ void SIM_Release_Context(SCARDCONTEXT hContext) {
 
   rv = SCardReleaseContext(hContext);
   switch(rv) {
-  case SCARD_E_INVALID_HANDLE: {
-    perror(strcat("SIM_Release_Context:",ERR_INVALID_CONTEXT_HANDLER));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_S_SUCCESS: {
-    printf("Context has been successfully released.\n");
-    break;
-  }
-  default:  {
-    perror(strcat("SIM_Release_Context:",ERR_WRONG_RETURN_VALUE));
-    exit(EXIT_FAILURE);
-  }
+    case SCARD_E_INVALID_HANDLE: {
+      perror(strcat("SIM_Release_Context:",ERR_INVALID_CONTEXT_HANDLER));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_S_SUCCESS: {
+      printf("Context has been successfully released.\n");
+      break;
+    }
+    default:  {
+      perror(strcat("SIM_Release_Context:",ERR_WRONG_RETURN_VALUE));
+      exit(EXIT_FAILURE);
+    }
   }
 }
 
@@ -129,24 +132,24 @@ LPSTR Detect_Readers(SCARDCONTEXT hContext) {
 
   //Fill mszReaders with the names of active readers
   rv = SCardListReaders(hContext, mszGroups, mszReaders, &dwReaders);
-  	
+
   switch (rv) {
-  case SCARD_E_INVALID_HANDLE: {
-    perror(strcat("Detect_Readers:",ERR_INVALID_SCOPE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INSUFFICIENT_BUFFER: {
-    perror(strcat("Detect_Readers:",ERR_INSUFFICIENT_BUFFER));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_S_SUCCESS: {
-    printf("Active readers detected: %s. \n",mszReaders);
-    return(mszReaders);
-  }
-  default: {
-    perror(strcat("Detect_Readers:",ERR_WRONG_RETURN_VALUE));
-    exit(EXIT_FAILURE);
-  }
+    case SCARD_E_INVALID_HANDLE: {
+      perror(strcat("Detect_Readers:",ERR_INVALID_SCOPE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INSUFFICIENT_BUFFER: {
+      perror(strcat("Detect_Readers:",ERR_INSUFFICIENT_BUFFER));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_S_SUCCESS: {
+      printf("Active readers detected: %s. \n",mszReaders);
+      return(mszReaders);
+    }
+    default: {
+      perror(strcat("Detect_Readers:",ERR_WRONG_RETURN_VALUE));
+      exit(EXIT_FAILURE);
+    }
   }
 }
 
@@ -176,43 +179,42 @@ SCARDHANDLE SIM_Connect(SCARDCONTEXT hContext, LPSTR szReader) {
   DWORD dwActiveProtocol;
   LONG rv;
 
-  rv = SCardConnect(hContext, szReader, SCARD_SHARE_SHARED,
-		    SCARD_PROTOCOL_T0, &hCard, &dwActiveProtocol);
+  rv = SCardConnect(hContext, szReader, SCARD_SHARE_SHARED, SCARD_PROTOCOL_T0, &hCard, &dwActiveProtocol);
   switch(rv) {
-  case SCARD_E_NOT_READY: {
-    perror(strcat("SIM_Connect:",ERR_PORT_NOT_READY));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_VALUE: {
-    perror(strcat("SIM_Connect:",ERR_INVALID_PARAMETER_VALUE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_READER_UNAVAILABLE: {
-    perror(strcat("SIM_Connect:",ERR_READER_UNAVAILABLE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_UNSUPPORTED_FEATURE: {
-    perror(strcat("SIM_Connect:",ERR_PROTOCOL_UNAVAILABLE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_SHARING_VIOLATION: {
-    perror(strcat("SIM_Connect:",ERR_SHARING_VIOLATION));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_HANDLE: {
-    perror(strcat("SIM_Connect:",ERR_INVALID_CONTEXT_HANDLER));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_S_SUCCESS: {
-    printf("Connection with SIM card opened successfully.\n");
-    return(hCard);
-  }
-  default: {
-    perror(strcat("SIM_Connect:",ERR_WRONG_RETURN_VALUE));
-    printf("The card returned: %li.\n",rv);
-    printf("Suggestion: maybe card name was mistyped.\n");
-    exit(EXIT_FAILURE);
-  }
+    case SCARD_E_NOT_READY: {
+      perror(strcat("SIM_Connect:",ERR_PORT_NOT_READY));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_VALUE: {
+      perror(strcat("SIM_Connect:",ERR_INVALID_PARAMETER_VALUE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_READER_UNAVAILABLE: {
+      perror(strcat("SIM_Connect:",ERR_READER_UNAVAILABLE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_UNSUPPORTED_FEATURE: {
+      perror(strcat("SIM_Connect:",ERR_PROTOCOL_UNAVAILABLE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_SHARING_VIOLATION: {
+      perror(strcat("SIM_Connect:",ERR_SHARING_VIOLATION));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_HANDLE: {
+      perror(strcat("SIM_Connect:",ERR_INVALID_CONTEXT_HANDLER));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_S_SUCCESS: {
+      printf("Connection with SIM card opened successfully.\n");
+      return(hCard);
+    }
+    default: {
+      perror(strcat("SIM_Connect:",ERR_WRONG_RETURN_VALUE));
+      printf("The card returned: %li.\n",rv);
+      printf("Suggestion: maybe card name was mistyped.\n");
+      exit(EXIT_FAILURE);
+    }
   }
 }
 
@@ -236,22 +238,22 @@ void SIM_Disconnect(SCARDHANDLE hCard) {
 
   rv = SCardDisconnect(hCard, SCARD_UNPOWER_CARD);
   switch(rv) {
-  case SCARD_E_INVALID_HANDLE: {
-    perror(strcat("SIM_Disconnect:",ERR_INVALID_CONTEXT_HANDLER));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_VALUE: {
-    perror(strcat("SIM_Disconnect:",ERR_INVALID_DIRECTIVE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_S_SUCCESS: {
-    printf("SIM card connection successfully released.\n");
-    break;
-  }
-  default: {
-    perror(strcat("SIM_Disconnect:",ERR_WRONG_RETURN_VALUE));
-    exit(EXIT_FAILURE);
-  }
+    case SCARD_E_INVALID_HANDLE: {
+      perror(strcat("SIM_Disconnect:",ERR_INVALID_CONTEXT_HANDLER));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_VALUE: {
+      perror(strcat("SIM_Disconnect:",ERR_INVALID_DIRECTIVE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_S_SUCCESS: {
+      printf("SIM card connection successfully released.\n");
+      break;
+    }
+    default: {
+      perror(strcat("SIM_Disconnect:",ERR_WRONG_RETURN_VALUE));
+      exit(EXIT_FAILURE);
+    }
   }
 }
 
@@ -283,85 +285,83 @@ RESPONSE* SIM_Status(SCARDHANDLE hCard) {
   lettori = (LPSTR)malloc(sizeof(char)*50);
   pcchReaderLen = 50;
   
-  rv = SCardStatus(hCard, lettori, &pcchReaderLen,
-		   &dwState, &dwProtocol, pbAtr, &pcbAtrLen);
+  rv = SCardStatus(hCard, lettori, &pcchReaderLen, &dwState, &dwProtocol, pbAtr, &pcbAtrLen);
   switch(rv) {
-  case SCARD_E_READER_UNAVAILABLE: {
-    perror(strcat("SIM_Status:",ERR_READER_REMOVED));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INSUFFICIENT_BUFFER: {
-    perror(strcat("SIM_Status:",ERR_INSUFFICIENT_BUFFER));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_HANDLE: {
-    perror(strcat("SIM_Status:",ERR_INVALID_CONTEXT_HANDLER));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_S_SUCCESS: {
-    printf("\n\nCARD STATUS = :\n");
-    switch(dwState) {
-      case SCARD_ABSENT: {
-	printf("\tThere is no card into the reader.");
-	break;
+    case SCARD_E_READER_UNAVAILABLE: {
+      perror(strcat("SIM_Status:",ERR_READER_REMOVED));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INSUFFICIENT_BUFFER: {
+      perror(strcat("SIM_Status:",ERR_INSUFFICIENT_BUFFER));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_HANDLE: {
+      perror(strcat("SIM_Status:",ERR_INVALID_CONTEXT_HANDLER));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_S_SUCCESS: {
+      printf("\n\nCARD STATUS = :\n");
+      switch(dwState) {
+        case SCARD_ABSENT: {
+          printf("\tThere is no card into the reader.");
+          break;
+        }
+        case SCARD_PRESENT: {
+          printf("\tCard present but not ready to be used.");
+          break;
+        }
+        case SCARD_SWALLOWED: {
+          printf("\tCard present and ready to be used, but not powered.");
+          break;
+        }
+        case SCARD_POWERED: {
+          printf("\tCard powered, but mode not recognized by the driver.");
+          break;
+        }
+        case SCARD_NEGOTIABLE: {
+          printf("\tCard reset and waiting PTS negotiation.");
+          break;
+        }
+        case SCARD_SPECIFIC: {
+          printf("\tCard reset and specific communication protocols established.");
+          break;
+        }
+        default: {
+          printf("\tCARD ANSWERED WITH AN UNKNOWN STATE: %.2X.",dwState);
+        }
       }
-      case SCARD_PRESENT: {
-	printf("\tCard present but not ready to be used.");
-	break;
+
+      printf("\n\nCommunication protocol is:\n");
+      switch(dwProtocol) {
+        case SCARD_PROTOCOL_T0: {
+          printf("\tT=0.\n");
+          break;
+        }
+        case SCARD_PROTOCOL_T1: {
+          printf("\tT=1.\n");
+          break;
+        }
+        default: {
+          printf("\tCARD ANSWERED WITH AN UNKNOWN PROTOCOL.\n");
+        }
       }
-      case SCARD_SWALLOWED: {
-	printf("\tCard present and ready to be used, but not powered.");
-	break;
+
+      printf("\n\nATR = ");
+      print_array(pbAtr,pcbAtrLen);
+      printf("\n\nATR length = %i.\n",pcbAtrLen);
+
+      resp = create_b_list();
+      for(i=0; i<pcbAtrLen; i++) {
+        blist_add_element(resp,pbAtr[i]);
       }
-      case SCARD_POWERED: {
-	printf("\tCard powered, but mode not recognized by the driver.");
-	break;
-      }
-      case SCARD_NEGOTIABLE: {
-	printf("\tCard reset and waiting PTS negotiation.");
-	break;
-      }
-      case SCARD_SPECIFIC: {
-	printf("\tCard reset and specific communication protocols established.");
-	break;
-      }
+
+      return(resp);
+    }
     default: {
-      printf("\tCARD ANSWERED WITH AN UNKNOWN STATE: %.2X.",dwState);
+      perror(strcat("SIM_Status:",ERR_WRONG_RETURN_VALUE));
+      printf("\nValue returned =  %.2X\n",rv);
+      exit(EXIT_FAILURE);
     }
-    }
-
-    printf("\n\nCommunication protocol is:\n");
-    switch(dwProtocol) {
-      case SCARD_PROTOCOL_T0: {
-	printf("\tT=0.\n");
-	break;
-      }
-      case SCARD_PROTOCOL_T1: {
-	printf("\tT=1.\n");
-	break;
-      }
-    default: {
-      printf("\tCARD ANSWERED WITH AN UNKNOWN PROTOCOL.\n");
-    }
-    }
-
-    printf("\n\nATR = ");
-    print_array(pbAtr,pcbAtrLen);
-    printf("\n\nATR lenght = %i.\n",pcbAtrLen);
-
-
-    resp = create_b_list();
-    for(i=0; i<pcbAtrLen; i++) {
-      blist_add_element(resp,pbAtr[i]);
-    }
-
-    return(resp);
-  }
-  default: {
-    perror(strcat("SIM_Status:",ERR_WRONG_RETURN_VALUE));
-    printf("\nValue returned =  %.2X\n",rv);
-    exit(EXIT_FAILURE);
-  }
   }
 }
 
@@ -385,26 +385,26 @@ void SIM_Begin_Transaction(SCARDHANDLE hCard) {
 
   rv = SCardBeginTransaction(hCard);
   switch(rv) {
-  case SCARD_E_READER_UNAVAILABLE: {
-    perror(strcat("SIM_Begin_Transaction:",ERR_READER_REMOVED));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_SHARING_VIOLATION: {
-    perror(strcat("SIM_Begin_Transaction:",ERR_SHARING_VIOLATION));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_HANDLE: {
-    perror(strcat("SIM_Begin_Transaction:",ERR_INVALID_CONTEXT_HANDLER));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_S_SUCCESS: {
-    printf("TRANSACTION SUCCESSFULLY OPENED...\n");
-    break;
-  }
-  default: {
-    perror(strcat("SIM_Begin_Transaction:",ERR_WRONG_RETURN_VALUE));
-    exit(EXIT_FAILURE);
-  }
+    case SCARD_E_READER_UNAVAILABLE: {
+      perror(strcat("SIM_Begin_Transaction:",ERR_READER_REMOVED));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_SHARING_VIOLATION: {
+      perror(strcat("SIM_Begin_Transaction:",ERR_SHARING_VIOLATION));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_HANDLE: {
+      perror(strcat("SIM_Begin_Transaction:",ERR_INVALID_CONTEXT_HANDLER));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_S_SUCCESS: {
+      printf("TRANSACTION SUCCESSFULLY OPENED...\n");
+      break;
+    }
+    default: {
+      perror(strcat("SIM_Begin_Transaction:",ERR_WRONG_RETURN_VALUE));
+      exit(EXIT_FAILURE);
+    }
   }
 }
 
@@ -432,26 +432,26 @@ void SIM_End_Transaction(SCARDHANDLE hCard) {
 
   rv = SCardEndTransaction(hCard, SCARD_LEAVE_CARD);
   switch(rv) {
-  case SCARD_E_READER_UNAVAILABLE: {
-    perror(strcat("SIM_End_Transaction:",ERR_READER_REMOVED));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_SHARING_VIOLATION: {
-    perror(strcat("SIM_End_Transaction:",ERR_SHARING_VIOLATION));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_HANDLE: {
-    perror(strcat("SIM_End_Transaction:",ERR_INVALID_CONTEXT_HANDLER));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_S_SUCCESS: {
-    printf("TRANSACTION SUCCESSFULLY CLOSED.\n");
-    break;
-  }
-  default: {
-    perror(strcat("SIM_End_Transaction:",ERR_WRONG_RETURN_VALUE));
-    exit(EXIT_FAILURE);
-  }
+    case SCARD_E_READER_UNAVAILABLE: {
+      perror(strcat("SIM_End_Transaction:",ERR_READER_REMOVED));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_SHARING_VIOLATION: {
+      perror(strcat("SIM_End_Transaction:",ERR_SHARING_VIOLATION));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_HANDLE: {
+      perror(strcat("SIM_End_Transaction:",ERR_INVALID_CONTEXT_HANDLER));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_S_SUCCESS: {
+      printf("TRANSACTION SUCCESSFULLY CLOSED.\n");
+      break;
+    }
+    default: {
+      perror(strcat("SIM_End_Transaction:",ERR_WRONG_RETURN_VALUE));
+      exit(EXIT_FAILURE);
+    }
   }
 }
 
@@ -481,7 +481,7 @@ void SIM_End_Transaction(SCARDHANDLE hCard) {
 //     it exits.
 //
 RESPONSE* gsm_select(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
-		     long int id_file) {
+                     long int id_file) {
 
   int i;
   LONG rv;
@@ -489,8 +489,8 @@ RESPONSE* gsm_select(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
                         // words
   BYTE pbSendBuffer[7] = {GSM_CLASS, SELECT, 0x00, 0x00, 0x02,
                           (BYTE)((id_file & 0xFF00)>>8), // this is the msb of
-			                                 // the address
-			  (BYTE)(id_file & 0x00FF)};     // this is the lsb
+                                                         // the address
+                          (BYTE)(id_file & 0x00FF)};     // this is the lsb
   DWORD dwSendLength = (int)sizeof(pbSendBuffer);
   DWORD pcbRecvLength = (int)sizeof(pbRecvBuffer);
   SCARD_IO_REQUEST pioRecvPci;
@@ -502,57 +502,57 @@ RESPONSE* gsm_select(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
   }
 
   rv = SCardTransmit(hCard, dwActiveProtocol, pbSendBuffer, dwSendLength,
-		     &pioRecvPci, pbRecvBuffer, &pcbRecvLength);
+                     &pioRecvPci, pbRecvBuffer, &pcbRecvLength);
   switch(rv) {
-  case SCARD_E_NOT_TRANSACTED: {
-    perror(strcat("SCardTransmit:", ERR_APDU_EXCHANGE_FAILED));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_VALUE: {
-    perror(strcat("SCardTransmit", ERR_INVALID_PARAMETER_VALUE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_READER_UNAVAILABLE: {
-    perror(strcat("SCardTransmit", ERR_READER_UNAVAILABLE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_PROTO_MISMATCH: {
-    perror(strcat("SCardTransmit", ERR_PROTOCOL_DIFFERENT));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_W_RESET_CARD: {
-    perror(strcat("SCardTransmit", ERR_CARD_RESET));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_W_REMOVED_CARD: {
-    perror(strcat("SCardTransmit", ERR_CARD_REMOVED));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_HANDLE: {
-    perror(strcat("SCardTransmit", ERR_INVALID_CONTEXT_HANDLER));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_S_SUCCESS: { //DEBUG
-    //printf("APDU SELECT successfully transmitted.\n");
-    //printf("Summary of input data:\n");
-    //printf("SENT APDU SELECT: ");
-    //print_array(pbSendBuffer,dwSendLength);
-    //printf("\nLength of sent APDU SELECT: %i\n", dwSendLength);
-    //printf("RECEIVED RESPONSE: ");
-    //print_array(pbRecvBuffer,pcbRecvLength);
-    //printf("\n");
-    //printf("Length of received response: %i.\n", pcbRecvLength);
-    break;
+    case SCARD_E_NOT_TRANSACTED: {
+      perror(strcat("SCardTransmit:", ERR_APDU_EXCHANGE_FAILED));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_VALUE: {
+      perror(strcat("SCardTransmit", ERR_INVALID_PARAMETER_VALUE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_READER_UNAVAILABLE: {
+      perror(strcat("SCardTransmit", ERR_READER_UNAVAILABLE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_PROTO_MISMATCH: {
+      perror(strcat("SCardTransmit", ERR_PROTOCOL_DIFFERENT));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_W_RESET_CARD: {
+      perror(strcat("SCardTransmit", ERR_CARD_RESET));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_W_REMOVED_CARD: {
+      perror(strcat("SCardTransmit", ERR_CARD_REMOVED));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_HANDLE: {
+      perror(strcat("SCardTransmit", ERR_INVALID_CONTEXT_HANDLER));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_S_SUCCESS: { //DEBUG
+      //printf("APDU SELECT successfully transmitted.\n");
+      //printf("Summary of input data:\n");
+      //printf("SENT APDU SELECT: ");
+      //print_array(pbSendBuffer,dwSendLength);
+      //printf("\nLength of sent APDU SELECT: %i\n", dwSendLength);
+      //printf("RECEIVED RESPONSE: ");
+      //print_array(pbRecvBuffer,pcbRecvLength);
+      //printf("\n");
+      //printf("Length of received response: %i.\n", pcbRecvLength);
+      break;
 
-  }
-  default: {
-    perror(strcat("SCardTransmit", ERR_WRONG_RETURN_VALUE));
-    exit(EXIT_FAILURE);
-  }
+    }
+    default: {
+      perror(strcat("SCardTransmit", ERR_WRONG_RETURN_VALUE));
+      exit(EXIT_FAILURE);
+    }
   }
 
   for (i=0; i<pcbRecvLength; i++) {
-   blist_add_element(response, pbRecvBuffer[i]);
+    blist_add_element(response, pbRecvBuffer[i]);
   }
 
   if((*response).b_list_length != pcbRecvLength) {
@@ -589,8 +589,8 @@ RESPONSE* gsm_select(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
 //     it exits.
 //
 RESPONSE* gsm_get_response(SCARDHANDLE hCard,
-			   SCARD_IO_REQUEST* dwActiveProtocol,
-			   BYTE resp_lgth) {
+                           SCARD_IO_REQUEST* dwActiveProtocol,
+                           BYTE resp_lgth) {
 
   int i;
   LONG rv;
@@ -604,65 +604,65 @@ RESPONSE* gsm_get_response(SCARDHANDLE hCard,
   inizializza_array(pbRecvBuffer,(int)sizeof(pbRecvBuffer));
 
   rv = SCardTransmit(hCard, dwActiveProtocol, pbSendBuffer, dwSendLength,
-		     &pioRecvPci, pbRecvBuffer, &pcbRecvLength);
+                     &pioRecvPci, pbRecvBuffer, &pcbRecvLength);
 
   switch(rv) {
-  case SCARD_E_NOT_TRANSACTED: {
-    perror(strcat("SCardTransmit", ERR_APDU_EXCHANGE_FAILED));
-    printf("Summary of input data:\n");
-    printf("SENT APDU GET RESPONSE: ");
-    print_array(pbSendBuffer,(int)sizeof(pbSendBuffer));
-    printf("\nLength of sent APDU GET RESPONSE: %i\n", dwSendLength);
-    printf("RECEIVED RESPONSE: ");
-    print_array(pbRecvBuffer,pcbRecvLength);
-    printf("\n");
-    printf("Length of received response: %i.\n", pcbRecvLength);
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_VALUE: {
-    perror(strcat("SCardTransmit", ERR_INVALID_PARAMETER_VALUE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_READER_UNAVAILABLE: {
-    perror(strcat("SCardTransmit", ERR_READER_UNAVAILABLE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_PROTO_MISMATCH: {
-    perror(strcat("SCardTransmit", ERR_PROTOCOL_DIFFERENT));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_W_RESET_CARD: {
-    perror(strcat("SCardTransmit", ERR_CARD_RESET));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_W_REMOVED_CARD: {
-    perror(strcat("SCardTransmit", ERR_CARD_REMOVED));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_HANDLE: {
-    perror(strcat("SCardTransmit", ERR_INVALID_CONTEXT_HANDLER));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_S_SUCCESS: {
-    /*
+    case SCARD_E_NOT_TRANSACTED: {
+      perror(strcat("SCardTransmit", ERR_APDU_EXCHANGE_FAILED));
+      printf("Summary of input data:\n");
+      printf("SENT APDU GET RESPONSE: ");
+      print_array(pbSendBuffer,(int)sizeof(pbSendBuffer));
+      printf("\nLength of sent APDU GET RESPONSE: %i\n", dwSendLength);
+      printf("RECEIVED RESPONSE: ");
+      print_array(pbRecvBuffer,pcbRecvLength);
+      printf("\n");
+      printf("Length of received response: %i.\n", pcbRecvLength);
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_VALUE: {
+      perror(strcat("SCardTransmit", ERR_INVALID_PARAMETER_VALUE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_READER_UNAVAILABLE: {
+      perror(strcat("SCardTransmit", ERR_READER_UNAVAILABLE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_PROTO_MISMATCH: {
+      perror(strcat("SCardTransmit", ERR_PROTOCOL_DIFFERENT));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_W_RESET_CARD: {
+      perror(strcat("SCardTransmit", ERR_CARD_RESET));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_W_REMOVED_CARD: {
+      perror(strcat("SCardTransmit", ERR_CARD_REMOVED));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_HANDLE: {
+      perror(strcat("SCardTransmit", ERR_INVALID_CONTEXT_HANDLER));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_S_SUCCESS: {
+      /*
       // DEBUG MESSAGES
-    printf("APDU GET RESPONSE successfully transmitted.\n");
-    printf("Summary of input data:\n");
-    printf("SENT APDU GET RESPONSE: ");
-    print_array(pbSendBuffer,dwSendLength);
-    printf("\nLength of sent APDU GET RESPONSE: %i\n", dwSendLength);
-    printf("RECEIVED RESPONSE: ");
-    print_array(pbRecvBuffer,pcbRecvLength);
-    printf("\n");
-    printf("Length of received response: %i.\n", pcbRecvLength);
-    */
-    break;
-  }
-  default: {
-    perror(strcat("SCardTransmit", ERR_WRONG_RETURN_VALUE));
-    printf("The value returned is: %.2X",rv);
-    exit(EXIT_FAILURE);
-  }
+      printf("APDU GET RESPONSE successfully transmitted.\n");
+      printf("Summary of input data:\n");
+      printf("SENT APDU GET RESPONSE: ");
+      print_array(pbSendBuffer,dwSendLength);
+      printf("\nLength of sent APDU GET RESPONSE: %i\n", dwSendLength);
+      printf("RECEIVED RESPONSE: ");
+      print_array(pbRecvBuffer,pcbRecvLength);
+      printf("\n");
+      printf("Length of received response: %i.\n", pcbRecvLength);
+      */
+      break;
+    }
+    default: {
+      perror(strcat("SCardTransmit", ERR_WRONG_RETURN_VALUE));
+      printf("The value returned is: %.2X",rv);
+      exit(EXIT_FAILURE);
+    }
   }
 
   for (i=0; i<pcbRecvLength; i++) {
@@ -698,7 +698,7 @@ RESPONSE* gsm_get_response(SCARDHANDLE hCard,
 //     specified in CCITT T.50 (ISO 646 - 1983)
 //
 RESPONSE* gsm_verify_chv(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
-			 BYTE_LIST* chv1) {
+                         BYTE_LIST* chv1) {
 
   int i;
   LONG rv;
@@ -709,14 +709,14 @@ RESPONSE* gsm_verify_chv(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
 
   //We're about to verify CHV1
   BYTE pbSendBuffer[13] = {GSM_CLASS, VERIFY_CHV, 0x00, 0x01, 0x08,
-			   blist_get_element(chv1,0),
-			   blist_get_element(chv1,1),
-			   blist_get_element(chv1,2),
-			   blist_get_element(chv1,3),
-			   blist_get_element(chv1,4),
-			   blist_get_element(chv1,5),
-			   blist_get_element(chv1,6),
-			   blist_get_element(chv1,7)};
+                           blist_get_element(chv1,0),
+                           blist_get_element(chv1,1),
+                           blist_get_element(chv1,2),
+                           blist_get_element(chv1,3),
+                           blist_get_element(chv1,4),
+                           blist_get_element(chv1,5),
+                           blist_get_element(chv1,6),
+                           blist_get_element(chv1,7)};
   BYTE pbRecvBuffer[12]; //SW1 e SW2 included
 
   dwSendLength = sizeof(pbSendBuffer);
@@ -727,67 +727,67 @@ RESPONSE* gsm_verify_chv(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
   inizializza_array(pbRecvBuffer,(int)sizeof(pbRecvBuffer));
 
   rv = SCardTransmit(hCard, SCARD_PCI_T0, pbSendBuffer, dwSendLength,
-		     &pioRecvPci, pbRecvBuffer, &pcbRecvLength);
+                     &pioRecvPci, pbRecvBuffer, &pcbRecvLength);
 
   printf("\nDEBUG: pcbRecvLength = %i\n", pcbRecvLength);
   printf("\nDEBUG: rv = %i\n", rv);
 
   switch(rv) {
-  case SCARD_E_NOT_TRANSACTED: {
-    perror(strcat("gsm_verify_chv: ", ERR_APDU_EXCHANGE_FAILED));
-    printf("Summary of input data:\n");
-    printf("SENT APDU GET RESPONSE: ");
-    print_array(pbSendBuffer,(int)sizeof(pbSendBuffer));
-    printf("\nLength of sent APDU GET RESPONSE: %i\n", dwSendLength);
-    printf("RECEIVED RESPONSE: ");
-    print_array(pbRecvBuffer,pcbRecvLength);
-    printf("\n");
-    printf("Length of received response: %i.\n", pcbRecvLength);
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_VALUE: {
-    perror(strcat("gsm_verify_chv: ", ERR_INVALID_PARAMETER_VALUE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_READER_UNAVAILABLE: {
-    perror(strcat("gsm_verify_chv: ", ERR_READER_UNAVAILABLE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_PROTO_MISMATCH: {
-    perror(strcat("gsm_verify_chv: ", ERR_PROTOCOL_DIFFERENT));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_W_RESET_CARD: {
-    perror(strcat("gsm_verify_chv: ", ERR_CARD_RESET));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_W_REMOVED_CARD: {
-    perror(strcat("gsm_verify_chv: ", ERR_CARD_REMOVED));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_HANDLE: {
-    perror(strcat("gsm_verify_chv: ", ERR_INVALID_CONTEXT_HANDLER));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_S_SUCCESS: {
-    printf("APDU VERIFY CHV successfully transmitted.\n");
-    printf("Summary of input data:\n");
-    printf("SENT APDU VERIFY CHV: ");
-    print_array(pbSendBuffer,dwSendLength);
-    printf("\nLength of sent APDU VERIFY CHV: %i\n", dwSendLength);
-    printf("RECEIVED RESPONSE: ");
-    print_array(pbRecvBuffer,pcbRecvLength);
-    printf("\n");
-    printf("Length of received response: %i.\n", pcbRecvLength);
-    getchar();
-    getchar();
-    break;
-  }
-  default: {
-    perror(strcat("gsm_verify_chv: ", ERR_WRONG_RETURN_VALUE));
-    printf("The value returned is: %.2X",rv);
-    exit(EXIT_FAILURE);
-  }
+    case SCARD_E_NOT_TRANSACTED: {
+      perror(strcat("gsm_verify_chv: ", ERR_APDU_EXCHANGE_FAILED));
+      printf("Summary of input data:\n");
+      printf("SENT APDU GET RESPONSE: ");
+      print_array(pbSendBuffer,(int)sizeof(pbSendBuffer));
+      printf("\nLength of sent APDU GET RESPONSE: %i\n", dwSendLength);
+      printf("RECEIVED RESPONSE: ");
+      print_array(pbRecvBuffer,pcbRecvLength);
+      printf("\n");
+      printf("Length of received response: %i.\n", pcbRecvLength);
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_VALUE: {
+      perror(strcat("gsm_verify_chv: ", ERR_INVALID_PARAMETER_VALUE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_READER_UNAVAILABLE: {
+      perror(strcat("gsm_verify_chv: ", ERR_READER_UNAVAILABLE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_PROTO_MISMATCH: {
+      perror(strcat("gsm_verify_chv: ", ERR_PROTOCOL_DIFFERENT));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_W_RESET_CARD: {
+      perror(strcat("gsm_verify_chv: ", ERR_CARD_RESET));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_W_REMOVED_CARD: {
+      perror(strcat("gsm_verify_chv: ", ERR_CARD_REMOVED));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_HANDLE: {
+      perror(strcat("gsm_verify_chv: ", ERR_INVALID_CONTEXT_HANDLER));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_S_SUCCESS: {
+      printf("APDU VERIFY CHV successfully transmitted.\n");
+      printf("Summary of input data:\n");
+      printf("SENT APDU VERIFY CHV: ");
+      print_array(pbSendBuffer,dwSendLength);
+      printf("\nLength of sent APDU VERIFY CHV: %i\n", dwSendLength);
+      printf("RECEIVED RESPONSE: ");
+      print_array(pbRecvBuffer,pcbRecvLength);
+      printf("\n");
+      printf("Length of received response: %i.\n", pcbRecvLength);
+      getchar();
+      getchar();
+      break;
+    }
+    default: {
+      perror(strcat("gsm_verify_chv: ", ERR_WRONG_RETURN_VALUE));
+      printf("The value returned is: %.2X",rv);
+      exit(EXIT_FAILURE);
+    }
   }
 
   for (i=0; i<pcbRecvLength; i++) {
@@ -825,8 +825,8 @@ RESPONSE* gsm_verify_chv(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
 //   None.
 //
 int gsm_transparent_file_readability (SCARDHANDLE hCard,
-				      SCARD_IO_REQUEST* dwActiveProtocol,
-				      BYTE block_dim) {
+                                      SCARD_IO_REQUEST* dwActiveProtocol,
+                                      BYTE block_dim) {
 
 }
 
@@ -856,8 +856,8 @@ int gsm_transparent_file_readability (SCARDHANDLE hCard,
 //     than 256 bytes.
 //
 RESPONSE* gsm_read_transparent_file (SCARDHANDLE hCard,
-				     SCARD_IO_REQUEST* dwActiveProtocol,
-				     BYTE block_dim) {
+                                     SCARD_IO_REQUEST* dwActiveProtocol,
+                                     BYTE block_dim) {
 
   int i;
   LONG rv;
@@ -879,61 +879,61 @@ RESPONSE* gsm_read_transparent_file (SCARDHANDLE hCard,
   inizializza_array(pbRecvBuffer,(int)sizeof(pbRecvBuffer));
 
   rv = SCardTransmit(hCard, SCARD_PCI_T0, pbSendBuffer, dwSendLength,
-		     &pioRecvPci, pbRecvBuffer, &pcbRecvLength);
+                     &pioRecvPci, pbRecvBuffer, &pcbRecvLength);
   switch(rv) {
-  case SCARD_E_NOT_TRANSACTED: {
-    perror(strcat("gsm_read_transparent_file: ", ERR_APDU_EXCHANGE_FAILED));
-    printf("Summary of input data:\n");
-    printf("SENT APDU GET RESPONSE: ");
-    print_array(pbSendBuffer,(int)sizeof(pbSendBuffer));
-    printf("\nLength of sent APDU GET RESPONSE: %i\n", dwSendLength);
-    printf("RECEIVED RESPONSE: ");
-    print_array(pbRecvBuffer,pcbRecvLength);
-    printf("\n");
-    printf("Length of received response: %i.\n", pcbRecvLength);
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_VALUE: {
-    perror(strcat("gsm_read_transparent_file: ", ERR_INVALID_PARAMETER_VALUE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_READER_UNAVAILABLE: {
-    perror(strcat("gsm_read_transparent_file: ", ERR_READER_UNAVAILABLE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_PROTO_MISMATCH: {
-    perror(strcat("gsm_read_transparent_file: ", ERR_PROTOCOL_DIFFERENT));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_W_RESET_CARD: {
-    perror(strcat("gsm_read_transparent_file: ", ERR_CARD_RESET));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_W_REMOVED_CARD: {
-    perror(strcat("gsm_read_transparent_file: ", ERR_CARD_REMOVED));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_HANDLE: {
-    perror(strcat("gsm_read_transparent_file: ", ERR_INVALID_CONTEXT_HANDLER));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_S_SUCCESS: {
-    printf("APDU GET RESPONSE successfully transmitted.\n");
-    printf("Summary of input data:\n");
-    printf("SENT APDU GET RESPONSE: ");
-    print_array(pbSendBuffer,dwSendLength);
-    printf("\nLength of sent APDU GET RESPONSE: %i\n", dwSendLength);
-    printf("RECEIVED RESPONSE: ");
-    print_array(pbRecvBuffer,pcbRecvLength);
-    printf("\n");
-    printf("Length of received response: %i.\n", pcbRecvLength);
-    break;
-  }
-  default: {
-    perror(strcat("gsm_read_transparent_file: ", ERR_WRONG_RETURN_VALUE));
-    printf("The value returned is: %.2X",rv);
-    exit(EXIT_FAILURE);
-  }
+    case SCARD_E_NOT_TRANSACTED: {
+      perror(strcat("gsm_read_transparent_file: ", ERR_APDU_EXCHANGE_FAILED));
+      printf("Summary of input data:\n");
+      printf("SENT APDU GET RESPONSE: ");
+      print_array(pbSendBuffer,(int)sizeof(pbSendBuffer));
+      printf("\nLength of sent APDU GET RESPONSE: %i\n", dwSendLength);
+      printf("RECEIVED RESPONSE: ");
+      print_array(pbRecvBuffer,pcbRecvLength);
+      printf("\n");
+      printf("Length of received response: %i.\n", pcbRecvLength);
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_VALUE: {
+      perror(strcat("gsm_read_transparent_file: ", ERR_INVALID_PARAMETER_VALUE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_READER_UNAVAILABLE: {
+      perror(strcat("gsm_read_transparent_file: ", ERR_READER_UNAVAILABLE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_PROTO_MISMATCH: {
+      perror(strcat("gsm_read_transparent_file: ", ERR_PROTOCOL_DIFFERENT));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_W_RESET_CARD: {
+      perror(strcat("gsm_read_transparent_file: ", ERR_CARD_RESET));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_W_REMOVED_CARD: {
+      perror(strcat("gsm_read_transparent_file: ", ERR_CARD_REMOVED));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_HANDLE: {
+      perror(strcat("gsm_read_transparent_file: ", ERR_INVALID_CONTEXT_HANDLER));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_S_SUCCESS: {
+      printf("APDU GET RESPONSE successfully transmitted.\n");
+      printf("Summary of input data:\n");
+      printf("SENT APDU GET RESPONSE: ");
+      print_array(pbSendBuffer,dwSendLength);
+      printf("\nLength of sent APDU GET RESPONSE: %i\n", dwSendLength);
+      printf("RECEIVED RESPONSE: ");
+      print_array(pbRecvBuffer,pcbRecvLength);
+      printf("\n");
+      printf("Length of received response: %i.\n", pcbRecvLength);
+      break;
+    }
+    default: {
+      perror(strcat("gsm_read_transparent_file: ", ERR_WRONG_RETURN_VALUE));
+      printf("The value returned is: %.2X",rv);
+      exit(EXIT_FAILURE);
+    }
   }
 
   for (i=0; i<pcbRecvLength; i++) {
@@ -976,9 +976,9 @@ RESPONSE* gsm_read_transparent_file (SCARDHANDLE hCard,
 //     than 256 bytes.
 //
 REC_RESPONSE* gsm_read_linear_fixed_file (SCARDHANDLE hCard,
-				      SCARD_IO_REQUEST* dwActiveProtocol,
-				      int file_size,
-				      BYTE record_dim) {
+                                          SCARD_IO_REQUEST* dwActiveProtocol,
+                                          int file_size,
+                                          BYTE record_dim) {
 
   int i;
   REC_RESPONSE* response = create_rec_list();
@@ -999,7 +999,7 @@ REC_RESPONSE* gsm_read_linear_fixed_file (SCARDHANDLE hCard,
     // READ RECORD is invoked with mode=0x04 that is with an absolute reference
     // to the record number
     reclist_add_element(response,
-			gsm_read_record(hCard, dwActiveProtocol,
+                        gsm_read_record(hCard, dwActiveProtocol,
                                         i, 0x04, record_dim));
   }
 
@@ -1038,9 +1038,9 @@ REC_RESPONSE* gsm_read_linear_fixed_file (SCARDHANDLE hCard,
 //     the oldest (least recently written) one.
 //
 REC_RESPONSE* gsm_read_cyclic_file (SCARDHANDLE hCard,
-				    SCARD_IO_REQUEST* dwActiveProtocol,
-				    int file_size,
-				    BYTE record_dim) {
+                                    SCARD_IO_REQUEST* dwActiveProtocol,
+                                    int file_size,
+                                    BYTE record_dim) {
 
   int i;
   REC_RESPONSE* response = create_rec_list();
@@ -1061,9 +1061,9 @@ REC_RESPONSE* gsm_read_cyclic_file (SCARDHANDLE hCard,
     // READ RECORD is invoked with mode=0x03 that is "previous mode": this way
     // the primitive returns last record written before the current one.
     // The third parameter of gsm_read_record is useless here; anyway
-    // standards state that, in this case, his value must be forced to zero.
+    // standards state that, in this case, its value must be forced to zero.
     reclist_add_element(response,
-			gsm_read_record(hCard, dwActiveProtocol,
+                        gsm_read_record(hCard, dwActiveProtocol,
                                         0x00, 0x03, record_dim));
   }
 
@@ -1095,15 +1095,15 @@ REC_RESPONSE* gsm_read_cyclic_file (SCARDHANDLE hCard,
 //   Returns a pointer to the raw content of the specified record.
 //
 // NOTES:
-//   - For the pcsclite manual is not complete on values retuned by its API
+//   - For the pcsclite manual is not complete on values returned by its API
 //     functions, further cases may be included in the switch(rv) in the
 //     future.
 //
 RESPONSE* gsm_read_record (SCARDHANDLE hCard,
-			   SCARD_IO_REQUEST* dwActiveProtocol,
-			   BYTE rec_number,
-			   BYTE mode,
-			   BYTE rec_dim) {
+                           SCARD_IO_REQUEST* dwActiveProtocol,
+                           BYTE rec_number,
+                           BYTE mode,
+                           BYTE rec_dim) {
 
   int i;
   LONG rv;
@@ -1121,64 +1121,64 @@ RESPONSE* gsm_read_record (SCARDHANDLE hCard,
   inizializza_array(pbRecvBuffer,(int)sizeof(pbRecvBuffer));
 
   rv = SCardTransmit(hCard, SCARD_PCI_T0, pbSendBuffer, dwSendLength,
-		     &pioRecvPci, pbRecvBuffer, &pcbRecvLength);
+                     &pioRecvPci, pbRecvBuffer, &pcbRecvLength);
   switch(rv) {
-  case SCARD_E_NOT_TRANSACTED: {
-    perror(strcat("gsm_read_record: ", ERR_APDU_EXCHANGE_FAILED));
-    printf("Summary of input data:\n");
-    printf("SENT APDU GET RESPONSE: ");
-    print_array(pbSendBuffer,(int)sizeof(pbSendBuffer));
-    printf("\nLength of sent APDU GET RESPONSE: %i\n", dwSendLength);
-    printf("RECEIVED RESPONSE: ");
-    print_array(pbRecvBuffer,pcbRecvLength);
-    printf("\n");
-    printf("Length of received response: %i.\n", pcbRecvLength);
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_VALUE: {
-    perror(strcat("gsm_read_record: ", ERR_INVALID_PARAMETER_VALUE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_READER_UNAVAILABLE: {
-    perror(strcat("gsm_read_record: ", ERR_READER_UNAVAILABLE));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_PROTO_MISMATCH: {
-    perror(strcat("gsm_read_record: ", ERR_PROTOCOL_DIFFERENT));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_W_RESET_CARD: {
-    perror(strcat("gsm_read_record: ", ERR_CARD_RESET));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_W_REMOVED_CARD: {
-    perror(strcat("gsm_read_record: ", ERR_CARD_REMOVED));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_E_INVALID_HANDLE: {
-    perror(strcat("gsm_read_record: ", ERR_INVALID_CONTEXT_HANDLER));
-    exit(EXIT_FAILURE);
-  }
-  case SCARD_S_SUCCESS: {
-    /*
+    case SCARD_E_NOT_TRANSACTED: {
+      perror(strcat("gsm_read_record: ", ERR_APDU_EXCHANGE_FAILED));
+      printf("Summary of input data:\n");
+      printf("SENT APDU GET RESPONSE: ");
+      print_array(pbSendBuffer,(int)sizeof(pbSendBuffer));
+      printf("\nLength of sent APDU GET RESPONSE: %i\n", dwSendLength);
+      printf("RECEIVED RESPONSE: ");
+      print_array(pbRecvBuffer,pcbRecvLength);
+      printf("\n");
+      printf("Length of received response: %i.\n", pcbRecvLength);
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_VALUE: {
+      perror(strcat("gsm_read_record: ", ERR_INVALID_PARAMETER_VALUE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_READER_UNAVAILABLE: {
+      perror(strcat("gsm_read_record: ", ERR_READER_UNAVAILABLE));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_PROTO_MISMATCH: {
+      perror(strcat("gsm_read_record: ", ERR_PROTOCOL_DIFFERENT));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_W_RESET_CARD: {
+      perror(strcat("gsm_read_record: ", ERR_CARD_RESET));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_W_REMOVED_CARD: {
+      perror(strcat("gsm_read_record: ", ERR_CARD_REMOVED));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_E_INVALID_HANDLE: {
+      perror(strcat("gsm_read_record: ", ERR_INVALID_CONTEXT_HANDLER));
+      exit(EXIT_FAILURE);
+    }
+    case SCARD_S_SUCCESS: {
+      /*
       //DEBUG MESSAGES
-    printf("APDU GET RESPONSE successfully transmitted.\n");
-    printf("Summary of input data:\n");
-    printf("SENT APDU GET RESPONSE: ");
-    print_array(pbSendBuffer,dwSendLength);
-    printf("\nLength of sent APDU GET RESPONSE: %i\n", dwSendLength);
-    printf("RECEIVED RESPONSE: ");
-    print_array(pbRecvBuffer,pcbRecvLength);
-    printf("\n");
-    printf("Length of received response: %i.\n", pcbRecvLength);
-    */
-    break;
-  }
-  default: {
-    perror(strcat("gsm_read_record: ", ERR_WRONG_RETURN_VALUE));
-    printf("The value returned is: %.2X",rv);
-    exit(EXIT_FAILURE);
-  }
+      printf("APDU GET RESPONSE successfully transmitted.\n");
+      printf("Summary of input data:\n");
+      printf("SENT APDU GET RESPONSE: ");
+      print_array(pbSendBuffer,dwSendLength);
+      printf("\nLength of sent APDU GET RESPONSE: %i\n", dwSendLength);
+      printf("RECEIVED RESPONSE: ");
+      print_array(pbRecvBuffer,pcbRecvLength);
+      printf("\n");
+      printf("Length of received response: %i.\n", pcbRecvLength);
+      */
+      break;
+    }
+    default: {
+      perror(strcat("gsm_read_record: ", ERR_WRONG_RETURN_VALUE));
+      printf("The value returned is: %.2X",rv);
+      exit(EXIT_FAILURE);
+    }
   }
 
   for (i=0; i<pcbRecvLength; i++) {
