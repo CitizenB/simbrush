@@ -17,7 +17,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>  
+#include <string.h>
+#include <unistd.h>
+
 #include "utils.h"
 #include "gsm-constants.h"
 #include "dirtree.h"
@@ -52,7 +54,7 @@ void indent(FILE* output_file, int indent_level) {
   int i;
 
   for(i=0; i<indent_level; i++) {
-    	fputs("\t", output_file);
+    fputs("\t", output_file);
   }
 }
 
@@ -82,10 +84,10 @@ void write_tag(FILE* output_file, int indent_level,
 
   indent(output_file, indent_level);
   if(closure_tag) {
-    	fprintf(output_file,"</");
+    fprintf(output_file,"</");
   }
   else {
-    	fprintf(output_file,"<");
+    fprintf(output_file,"<");
   }
   fprintf(output_file,"%s>\n",tag_name);
 
@@ -113,11 +115,11 @@ char* hex_filter(BYTE hex_number) {
   char* filtered_num;
 
   if(hex_number > 0xF) {
-    	//filtered_num = strcat(filtered_num, atoi(hex_number));
+    //filtered_num = strcat(filtered_num, atoi(hex_number));
   }
   else {
-    	filtered_num = "0";
-   	//filtered_num = strcat(filtered_num, atoi(hex_number));
+    filtered_num = "0";
+    //filtered_num = strcat(filtered_num, atoi(hex_number));
   }
 
   return(filtered_num);
@@ -151,7 +153,7 @@ RESPONSE* get_SWs_from_resp (RESPONSE* resp) {
   RESPONSE* response = create_b_list();
 
   for(i=((*resp).b_list_length - 2); i<(*resp).b_list_length; i++){
-    	blist_add_element(response, blist_get_element(resp,i));
+    blist_add_element(response, blist_get_element(resp,i));
   }
 
   return(response);
@@ -180,7 +182,7 @@ RESPONSE* clean_resp_from_SWs (RESPONSE* resp) {
   RESPONSE* response = create_b_list();
 
   for(i=0; i<((*resp).b_list_length - 2); i++){
-  	  blist_add_element(response, blist_get_element(resp,i));
+    blist_add_element(response, blist_get_element(resp,i));
   }
 
   return(response);
@@ -215,7 +217,7 @@ RESPONSE* clean_resp_from_SWs (RESPONSE* resp) {
 //   implementation would receive tag attributes as separate list.
 //
 void write_content(FILE* output_file, int indent_level, RESPONSE* resp,
-		   char* tag_name, char* attributes) {
+                   char* tag_name, char* attributes) {
 
   RESPONSE* sws;
   RESPONSE* content;
@@ -232,11 +234,11 @@ void write_content(FILE* output_file, int indent_level, RESPONSE* resp,
   // Then, i open the tag with the appropriate attributes and increment
   // indentation
   if(!strcmp(attributes,"")) {
-    	sprintf(attr_app,"%s %s", tag_name, attributes);
-    	write_tag(output_file, ind_lev, attr_app, 0);
+    sprintf(attr_app,"%s %s", tag_name, attributes);
+    write_tag(output_file, ind_lev, attr_app, 0);
   }
   else {
-    	write_tag(output_file, ind_lev, tag_name, 0);
+    write_tag(output_file, ind_lev, tag_name, 0);
   }
   ind_lev++;
 
@@ -246,7 +248,7 @@ void write_content(FILE* output_file, int indent_level, RESPONSE* resp,
   write_tag(output_file, ind_lev, "sw", 0);
   indent(output_file, ind_lev);
   for(i=0; i<(*sws).b_list_length; i++) {
-    	fprintf(output_file, "%.2X ", blist_get_element(sws,i));
+    fprintf(output_file, "%.2X ", blist_get_element(sws,i));
   }
   fputs("\n",output_file);
   write_tag(output_file, ind_lev, "sw", 1);
@@ -256,7 +258,7 @@ void write_content(FILE* output_file, int indent_level, RESPONSE* resp,
   write_tag(output_file, ind_lev, "content", 0);
   indent(output_file, ind_lev);
   for(i=0; i<(*content).b_list_length; i++) {
-    	fprintf(output_file, "%.2X ", blist_get_element(content,i));
+    fprintf(output_file, "%.2X ", blist_get_element(content,i));
   }
   fputs("\n",output_file);
   write_tag(output_file, ind_lev, "content", 1);
@@ -296,18 +298,16 @@ void write_content(FILE* output_file, int indent_level, RESPONSE* resp,
 //   None.
 //
 void xml_convert_ef_transp(FILE* file_to_write, int indent_level,
-			   TREE_NODE_TYPE* node) {
-
-  int i;
-  char * attributes = malloc(50*sizeof(char));
+                           TREE_NODE_TYPE* node) {
 
   write_tag(file_to_write, indent_level, "ef", 0);
   indent_level++;
 
   write_tag(file_to_write, indent_level, "header", 0);
   indent(file_to_write, indent_level);
+  int i;
   for(i=0; i<(*node).p_raw_header.b_list_length; i++) {
-    	fprintf(file_to_write, "%.2X ", blist_get_element(&(*node).p_raw_header,i));
+    fprintf(file_to_write, "%.2X ", blist_get_element(&(*node).p_raw_header,i));
   }
   fputs("\n",file_to_write);
   write_tag(file_to_write, indent_level, "header", 1);
@@ -349,27 +349,27 @@ void xml_convert_ef_transp(FILE* file_to_write, int indent_level,
 //   None.
 //
 void xml_convert_ef_linfixcyc(FILE* file_to_write, int indent_level,
-			   TREE_NODE_TYPE* node, int linfix) {
+                              TREE_NODE_TYPE* node, int linfix) {
 
   RECORD* aux;
-  int i,j,rec_length;
+  int i;
   char* attributes = malloc(50*sizeof(char));
 
   if(linfix) {
-    	//write_tag(file_to_write, indent_level, "ef type=\"linear fixed\"", 0);
-    	write_tag(file_to_write, indent_level, "ef", 0);
-    	indent_level++;
+    //write_tag(file_to_write, indent_level, "ef type=\"linear fixed\"", 0);
+    write_tag(file_to_write, indent_level, "ef", 0);
+    indent_level++;
   }
   else {
-    	//write_tag(file_to_write, indent_level, "ef type=\"cyclic\"", 0);
-    	write_tag(file_to_write, indent_level, "ef", 0);
-    	indent_level++;
+    //write_tag(file_to_write, indent_level, "ef type=\"cyclic\"", 0);
+    write_tag(file_to_write, indent_level, "ef", 0);
+    indent_level++;
   }
 
   write_tag(file_to_write, indent_level, "header", 0);
   indent(file_to_write, indent_level);
   for(i=0; i<(*node).p_raw_header.b_list_length; i++) {
-    	fprintf(file_to_write, "%.2X ", blist_get_element(&(*node).p_raw_header,i));
+    fprintf(file_to_write, "%.2X ", blist_get_element(&(*node).p_raw_header,i));
   }
   fputs("\n",file_to_write);
   write_tag(file_to_write, indent_level, "header", 1);
@@ -421,103 +421,103 @@ void xml_convert_ef_linfixcyc(FILE* file_to_write, int indent_level,
 //   None.
 //
 void xml_convert_tree(FILE* file_to_write, TREE_NODE_TYPE* tree,
-		      int indent_level) {
+                      int indent_level) {
 
   int i;
 
   switch((*tree).file_type) {
-  case FTYP_EF: {
+    case FTYP_EF: {
 
-    	if((*tree).firstborn != NULL){
-      		//printf("\nDEBUG: xml_convert_tree: EF cannot have sons! Something wrong happened.\n");
-      		exit(1);
-    	}
-    	switch(blist_get_element(&(*tree).p_raw_header, 13)) {
-    		case FSTR_TRANSP: {
-      			xml_convert_ef_transp(file_to_write, indent_level, tree);
-      			break;
-    		}
-    		case FSTR_LINFIX : {
-      			xml_convert_ef_linfixcyc(file_to_write, indent_level, tree, 1);
-      			break;
-    		}
-    		case FSTR_CYCLIC: {
-      			xml_convert_ef_linfixcyc(file_to_write, indent_level, tree, 0);
-      			break;
-    		}
-    		default: {
-      			//printf("\nDEBUG: xml_convert_tree: node represent an EF of an unknown type!\n");
-      			exit(1);
-    		}
-    	}
+      if((*tree).firstborn != NULL){
+        //printf("\nDEBUG: xml_convert_tree: EF cannot have sons! Something wrong happened.\n");
+        exit(1);
+      }
+      switch(blist_get_element(&(*tree).p_raw_header, 13)) {
+        case FSTR_TRANSP: {
+          xml_convert_ef_transp(file_to_write, indent_level, tree);
+          break;
+        }
+        case FSTR_LINFIX : {
+          xml_convert_ef_linfixcyc(file_to_write, indent_level, tree, 1);
+          break;
+        }
+        case FSTR_CYCLIC: {
+          xml_convert_ef_linfixcyc(file_to_write, indent_level, tree, 0);
+          break;
+        }
+        default: {
+          //printf("\nDEBUG: xml_convert_tree: node represent an EF of an unknown type!\n");
+          exit(1);
+        }
+      }
     
-    	if((*tree).next_brother != NULL){
-      		xml_convert_tree(file_to_write, (*tree).next_brother, indent_level);
-    	}
+      if((*tree).next_brother != NULL){
+        xml_convert_tree(file_to_write, (*tree).next_brother, indent_level);
+      }
     
-    	break;
-  }
-  case FTYP_DF: {
-    	indent(file_to_write, indent_level);
-    	fprintf(file_to_write, "<df>\n");
+      break;
+    }
+    case FTYP_DF: {
+      indent(file_to_write, indent_level);
+      fprintf(file_to_write, "<df>\n");
   
-    	indent_level++;
+      indent_level++;
 
-    	//writing of df header to output file
-    	write_tag(file_to_write, indent_level, "header", 0);
-    	indent(file_to_write, indent_level);
-    	for(i=0; i<(*tree).p_raw_header.b_list_length; i++) {
-      		fprintf(file_to_write, "%.2X ",
-	      		blist_get_element(&(*tree).p_raw_header,i));
-    	}
-    	fputs("\n",file_to_write);
-    	write_tag(file_to_write, indent_level, "header", 1);
+      //writing of df header to output file
+      write_tag(file_to_write, indent_level, "header", 0);
+      indent(file_to_write, indent_level);
+      for(i=0; i<(*tree).p_raw_header.b_list_length; i++) {
+        fprintf(file_to_write, "%.2X ",
+                blist_get_element(&(*tree).p_raw_header,i));
+      }
+      fputs("\n",file_to_write);
+      write_tag(file_to_write, indent_level, "header", 1);
     
-    	if((*tree).firstborn != NULL) {
-      		xml_convert_tree(file_to_write, (*tree).firstborn, indent_level);
-    	}
+      if((*tree).firstborn != NULL) {
+        xml_convert_tree(file_to_write, (*tree).firstborn, indent_level);
+      }
     
-    	indent_level--;
-    	write_tag(file_to_write, indent_level,  "df", 1);
+      indent_level--;
+      write_tag(file_to_write, indent_level,  "df", 1);
 
-    	if((*tree).next_brother != NULL) {
-      		xml_convert_tree(file_to_write, (*tree).next_brother, indent_level);
-    	}
-    	break;
-  }
-  case FTYP_MF: {
-    	indent(file_to_write, indent_level);
-    	fprintf(file_to_write, "<mf>\n");
+      if((*tree).next_brother != NULL) {
+        xml_convert_tree(file_to_write, (*tree).next_brother, indent_level);
+      }
+      break;
+    }
+    case FTYP_MF: {
+      indent(file_to_write, indent_level);
+      fprintf(file_to_write, "<mf>\n");
     
-    	indent_level++;
+      indent_level++;
 
-    	//writing of mf header to output file
-    	write_tag(file_to_write, indent_level, "header", 0);
-    	indent(file_to_write, indent_level);
-    	for(i=0; i<(*tree).p_raw_header.b_list_length; i++) {
-      		fprintf(file_to_write, "%.2X ",
-	      	blist_get_element(&(*tree).p_raw_header,i));
-    	}
-    	fputs("\n",file_to_write);
-    	write_tag(file_to_write, indent_level, "header", 1);
+      //writing of mf header to output file
+      write_tag(file_to_write, indent_level, "header", 0);
+      indent(file_to_write, indent_level);
+      for(i=0; i<(*tree).p_raw_header.b_list_length; i++) {
+        fprintf(file_to_write, "%.2X ",
+                blist_get_element(&(*tree).p_raw_header,i));
+      }
+      fputs("\n",file_to_write);
+      write_tag(file_to_write, indent_level, "header", 1);
 
-    	if((*tree).firstborn != NULL){
-      		xml_convert_tree(file_to_write, (*tree).firstborn, indent_level);
-    	}
+      if((*tree).firstborn != NULL){
+        xml_convert_tree(file_to_write, (*tree).firstborn, indent_level);
+      }
 
-    	indent_level--;
-    	write_tag(file_to_write, indent_level, "mf", 1);
+      indent_level--;
+      write_tag(file_to_write, indent_level, "mf", 1);
 
-    	if((*tree).next_brother != NULL){
-      		//printf("\nDEBUG: xml_convert_tree: MF cannot have brothers! Something wrong happened.\n");
-      		exit(1);
-    	}
-    	break;
-  }
-  default: {
-    	//printf("\nDEBUG: xml_convert_tree: node represent an unknown type of file!\n");
-    	exit(1);
-  }
+      if((*tree).next_brother != NULL){
+        //printf("\nDEBUG: xml_convert_tree: MF cannot have brothers! Something wrong happened.\n");
+        exit(1);
+      }
+      break;
+    }
+    default: {
+      //printf("\nDEBUG: xml_convert_tree: node represent an unknown type of file!\n");
+      exit(1);
+    }
   }
 
 }
@@ -551,7 +551,7 @@ void create_xml_results(FILE* results_file, SIM_CARD* sim_card) {
   // For now, just the core xml is produced as output.
 
   //fputs("<--! File automatically generated by Toothbrush tool -->",
-  //	results_file);
+  //    results_file);
   //fputs("\n\n",results_file);
 
   write_tag(results_file, 0, "simcard level=\"raw\"", 0);
@@ -560,7 +560,7 @@ void create_xml_results(FILE* results_file, SIM_CARD* sim_card) {
   write_tag(results_file, 1, "atr", 0);
   indent(results_file,1);
   for(i=0; i<(*(*sim_card).raw_atr).b_list_length; i++) {
-    	fprintf(results_file, "%.2X ", blist_get_element((*sim_card).raw_atr,i));
+    fprintf(results_file, "%.2X ", blist_get_element((*sim_card).raw_atr,i));
   }
   fputs("\n", results_file);
   write_tag(results_file, 1, "atr", 1);

@@ -63,6 +63,8 @@ LPSTR Detect_Readers(SCARDCONTEXT hContext);
 
 SCARDHANDLE SIM_Connect(SCARDCONTEXT hContext, LPSTR szReader);
 
+void SIM_Disconnect(SCARDHANDLE hCard);
+
 RESPONSE* SIM_Status(SCARDHANDLE hCard);
 
 void SIM_Begin_Transaction(SCARDHANDLE hCard);

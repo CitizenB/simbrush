@@ -3,10 +3,10 @@
  * NAME:          utils.c
  *
  * AUTHORS:       Fabio Casadei
- * 		  fabio.casadei@mercurio-ws.com
+ *                fabio.casadei@mercurio-ws.com
  *
- * 		  Antonio Savoldi
- * 		  antonio.savoldi@ing.unibs.it
+ *                Antonio Savoldi
+ *                antonio.savoldi@ing.unibs.it
  *
  * FILE TYPE:     C source file
  *
@@ -38,12 +38,11 @@ void send_warning(char* warn_msg) {
  ****************************************************************/
 
 
-int inizializza_array(BYTE* nome_array, int lunghezza_array) {
-
+void inizializza_array(BYTE* nome_array, int lunghezza_array) {
   int i;
 
   for (i=0; i<lunghezza_array; i++) {
-    	nome_array[i] = 0xFF;
+    nome_array[i] = 0xFF;
   }
 }
 
@@ -73,7 +72,7 @@ int print_array(BYTE array_name[], int array_length) {
   //printf("\nDEBUG: array_name length: %i\n", lunghezza_array);
 
   for (i=0; i<array_length; i++) {
-    	printf("%.2X ", array_name[i]);
+    printf("%.2X ", array_name[i]);
   }
 
   return(0);
@@ -140,24 +139,24 @@ int blist_add_element(BYTE_LIST* list, BYTE new_content) {
   (*p_aux).next_b_element = NULL;
 
   if (list == NULL) {
-    	perror(strcat("blist_add_element: ", PEB_NULL_INPUT_LIST));
-    	exit(EXIT_FAILURE);
+    perror(strcat("blist_add_element: ", PEB_NULL_INPUT_LIST));
+    exit(EXIT_FAILURE);
   } else if ((*list).p_byte_list == NULL) {
-    	(*list).p_byte_list = p_aux;
-    	(*list).b_list_length = 1;
-    	return(0);
+    (*list).p_byte_list = p_aux;
+    (*list).b_list_length = 1;
+    return(0);
   } else {
-    	control = 1;
-    	for (p_index = (*list).p_byte_list; (*p_index).next_b_element!=NULL ;
-	 	p_index = (*p_index).next_b_element) {
-    		control++;
-    	}
+    control = 1;
+    for (p_index = (*list).p_byte_list; (*p_index).next_b_element!=NULL ;
+         p_index = (*p_index).next_b_element) {
+      control++;
+    }
   }
   
   //Control on list length
   if ((*list).b_list_length != control) {
-    	perror(strcat("blist_add_element: ", PEB_WRONG_LIST_LENGTH));
-    	exit(EXIT_FAILURE);
+    perror(strcat("blist_add_element: ", PEB_WRONG_LIST_LENGTH));
+    exit(EXIT_FAILURE);
   }
 
   //At this point, p_index points to the last element of current list.
@@ -191,20 +190,20 @@ int print_b_list(BYTE_LIST* to_print) {
   BYTE_LIST_NODE* p_aux;
 
   if (to_print == NULL) {
-    	perror(strcat("print_b_list: ", PEB_NULL_INPUT_LIST));
-    	exit(EXIT_FAILURE);
+    perror(strcat("print_b_list: ", PEB_NULL_INPUT_LIST));
+    exit(EXIT_FAILURE);
   } else if ((*to_print).p_byte_list == NULL) {
-    	printf("print_b_list: this is an empty byte list!");
+    printf("print_b_list: this is an empty byte list!");
   } else {
-    	for (p_aux=(*to_print).p_byte_list; p_aux!=NULL; p_aux=(*p_aux).next_b_element) {
-      		printf("%.2X ", (*p_aux).content);
-      		i++;
-    	}
+    for (p_aux=(*to_print).p_byte_list; p_aux!=NULL; p_aux=(*p_aux).next_b_element) {
+      printf("%.2X ", (*p_aux).content);
+      i++;
+    }
   }
 
   if (i != (*to_print).b_list_length) {
-    	perror(strcat("print_b_list: ", PEB_WRONG_LIST_LENGTH));
-    	exit(EXIT_FAILURE);
+    perror(strcat("print_b_list: ", PEB_WRONG_LIST_LENGTH));
+    exit(EXIT_FAILURE);
   }
 
   return(0);
@@ -239,24 +238,24 @@ BYTE blist_get_element(BYTE_LIST* list, int position) {
   BYTE_LIST_NODE* p_aux;
 
   if (position < 0) {
-    	index += (*list).b_list_length; // In case of backward indexing, index is a
-                                        // negative number: to obtain the correct
-                                        // index, i sum it to the length of the
-                                        // list
+    index += (*list).b_list_length; // In case of backward indexing, index is a
+    // negative number: to obtain the correct
+    // index, i sum it to the length of the
+    // list
   }
 
   p_aux = (*list).p_byte_list;
   if (p_aux == NULL) {
-    	perror(strcat("blist_get_element", PEB_NULL_INPUT_LIST));
-    	exit(EXIT_FAILURE);
+    perror(strcat("blist_get_element", PEB_NULL_INPUT_LIST));
+    exit(EXIT_FAILURE);
   }
 
   for (i=1; i!=index; i++) {
-    	if (p_aux == NULL) {
-      		perror(strcat("blist_get_element", PEB_WRONG_LIST_LENGTH));
-      		exit(EXIT_FAILURE);
-    	}
-    	p_aux = (*p_aux).next_b_element;
+    if (p_aux == NULL) {
+      perror(strcat("blist_get_element", PEB_WRONG_LIST_LENGTH));
+      exit(EXIT_FAILURE);
+    }
+    p_aux = (*p_aux).next_b_element;
   }
    
   // When i = index, p_aux points to the element containing the requested byte
@@ -294,24 +293,24 @@ int blist_set_element(BYTE_LIST* list, int position, BYTE new_content) {
   BYTE_LIST_NODE* p_aux;
 
   if (position < 0) {
-    	index += (*list).b_list_length; // In case of backward indexing, index is a
-                                        // negative number: to obtain the correct
-                                        // index, i sum it to the length of the
-                                        // list
+    index += (*list).b_list_length; // In case of backward indexing, index is a
+    // negative number: to obtain the correct
+    // index, i sum it to the length of the
+    // list
   }
 
   p_aux = (*list).p_byte_list;
   if (p_aux == NULL) {
-    	perror(strcat("blist_get_element", PEB_NULL_INPUT_LIST));
-    	exit(EXIT_FAILURE);
+    perror(strcat("blist_get_element", PEB_NULL_INPUT_LIST));
+    exit(EXIT_FAILURE);
   }
 
   for (i=1; i!=index; i++) {
-    	if (p_aux == NULL) {
-      		perror(strcat("blist_get_element", PEB_WRONG_LIST_LENGTH));
-      		exit(EXIT_FAILURE);
-    	}
-    	p_aux = (*p_aux).next_b_element;
+    if (p_aux == NULL) {
+      perror(strcat("blist_get_element", PEB_WRONG_LIST_LENGTH));
+      exit(EXIT_FAILURE);
+    }
+    p_aux = (*p_aux).next_b_element;
   }
    
   // When i = index, p_aux points to the element containing the requested byte
@@ -386,24 +385,24 @@ int reclist_add_element(REC_LIST* list, RECORD* new_content) {
   (*p_aux).next_rec_element = NULL;
 
   if (list == NULL) {
-    	perror(strcat("reclist_add_element: ", PEB_NULL_INPUT_LIST));
-    	exit(EXIT_FAILURE);
+    perror(strcat("reclist_add_element: ", PEB_NULL_INPUT_LIST));
+    exit(EXIT_FAILURE);
   } else if ((*list).p_rec_list == NULL) {
-    	(*list).p_rec_list = p_aux;
-    	(*list).rec_list_length = 1;
-    	return(0);
+    (*list).p_rec_list = p_aux;
+    (*list).rec_list_length = 1;
+    return(0);
   } else {
-    	control = 1;
-    	for (p_index = (*list).p_rec_list; (*p_index).next_rec_element!=NULL ;
-	 	p_index = (*p_index).next_rec_element) {
-    		control++;
-    	}
+    control = 1;
+    for (p_index = (*list).p_rec_list; (*p_index).next_rec_element!=NULL ;
+         p_index = (*p_index).next_rec_element) {
+      control++;
+    }
   }
   
   //Control on list length
   if ((*list).rec_list_length != control) {
-    	perror(strcat("reclist_add_element: ", PEB_WRONG_LIST_LENGTH));
-    	exit(EXIT_FAILURE);
+    perror(strcat("reclist_add_element: ", PEB_WRONG_LIST_LENGTH));
+    exit(EXIT_FAILURE);
   }
 
   //At this point, p_index points to the last element of current list.
@@ -438,21 +437,21 @@ int print_rec_list(REC_LIST* to_print) {
   REC_LIST_NODE* p_aux;
 
   if (to_print == NULL) {
-    	perror(strcat("print_rec_list: ", PEB_NULL_INPUT_LIST));
-    	exit(EXIT_FAILURE);
+    perror(strcat("print_rec_list: ", PEB_NULL_INPUT_LIST));
+    exit(EXIT_FAILURE);
   } else if ((*to_print).p_rec_list == NULL) {
-    	printf("print_rec_list: this is an empty byte list!");
+    printf("print_rec_list: this is an empty byte list!");
   } else {
-    	for (p_aux=(*to_print).p_rec_list; p_aux!=NULL; p_aux=(*p_aux).next_rec_element) {
-      		print_b_list((*p_aux).content);
-      		printf("\n\n");
-      		i++;
-    	}
+    for (p_aux=(*to_print).p_rec_list; p_aux!=NULL; p_aux=(*p_aux).next_rec_element) {
+      print_b_list((*p_aux).content);
+      printf("\n\n");
+      i++;
+    }
   }
 
   if (i != (*to_print).rec_list_length) {
-    	perror(strcat("print_rec_list: ", PEB_WRONG_LIST_LENGTH));
-    	exit(EXIT_FAILURE);
+    perror(strcat("print_rec_list: ", PEB_WRONG_LIST_LENGTH));
+    exit(EXIT_FAILURE);
   }
 
   return(0);
@@ -488,24 +487,24 @@ RECORD* reclist_get_element(REC_LIST* list, int position) {
   REC_LIST_NODE* p_aux;
 
   if (position < 0) {
-    	index += (*list).rec_list_length; // In case of backward indexing, index
-                                          // is a negative number: to obtain the
-                                          // correct index, i sum it to the length
-                                          // of the list
+    index += (*list).rec_list_length; // In case of backward indexing, index
+    // is a negative number: to obtain the
+    // correct index, i sum it to the length
+    // of the list
   }
 
   p_aux = (*list).p_rec_list;
   if (p_aux == NULL) {
-    	perror(strcat("reclist_get_element", PEB_NULL_INPUT_LIST));
-    	exit(EXIT_FAILURE);
+    perror(strcat("reclist_get_element", PEB_NULL_INPUT_LIST));
+    exit(EXIT_FAILURE);
   }
 
   for (i=1; i!=index; i++) {
-    	if (p_aux == NULL) {
-      		perror(strcat("reclist_get_element", PEB_WRONG_LIST_LENGTH));
-      		exit(EXIT_FAILURE);
-    	}
-    	p_aux = (*p_aux).next_rec_element;
+    if (p_aux == NULL) {
+      perror(strcat("reclist_get_element", PEB_WRONG_LIST_LENGTH));
+      exit(EXIT_FAILURE);
+    }
+    p_aux = (*p_aux).next_rec_element;
   }
    
   // When i = index, p_aux points to the element containing the requested
@@ -544,24 +543,24 @@ int reclist_set_element(REC_LIST* list, int position, RECORD* new_content) {
   REC_LIST_NODE* p_aux;
 
   if (position < 0) {
-    	index += (*list).rec_list_length; // In case of backward indexing, index
-                                          // is a negative number: to obtain the
-                                          // correct index, i sum it to the length
-                                          // of the list
+    index += (*list).rec_list_length; // In case of backward indexing, index
+    // is a negative number: to obtain the
+    // correct index, i sum it to the length
+    // of the list
   }
 
   p_aux = (*list).p_rec_list;
   if (p_aux == NULL) {
-    	perror(strcat("reclist_get_element", PEB_NULL_INPUT_LIST));
-    	exit(EXIT_FAILURE);
+    perror(strcat("reclist_get_element", PEB_NULL_INPUT_LIST));
+    exit(EXIT_FAILURE);
   }
 
   for (i=1; i!=index; i++) {
-    	if (p_aux == NULL) {
-      		perror(strcat("reclist_get_element", PEB_WRONG_LIST_LENGTH));
-      		exit(EXIT_FAILURE);
-    	}
-    	p_aux = (*p_aux).next_rec_element;
+    if (p_aux == NULL) {
+      perror(strcat("reclist_get_element", PEB_WRONG_LIST_LENGTH));
+      exit(EXIT_FAILURE);
+    }
+    p_aux = (*p_aux).next_rec_element;
   }
    
   // When i = index, p_aux points to the element containing the requested

@@ -3,10 +3,10 @@
  * NAME:          utils.h
  *
  * AUTHORS:       Fabio Casadei
- * 		  fabio.casadei@mercurio-ws.com
+ *                fabio.casadei@mercurio-ws.com
  *
- * 		  Antonio Savoldi
- * 		  antonio.savoldi@ing.unibs.it
+ *                Antonio Savoldi
+ *                antonio.savoldi@ing.unibs.it
  *
  * FILE TYPE:     Header file
  *
@@ -19,7 +19,7 @@
 
 // PROGRAM-RELATED ERROR MESSAGES (PEB = Program Error or Bug)
 
-#define PEB_WRONG_LIST_LENGTH "inconsistence in list length found."
+#define PEB_WRONG_LIST_LENGTH "inconsistency in list length found."
 #define PEB_NULL_INPUT_LIST "NULL input list."
 
 
@@ -65,19 +65,19 @@ typedef BYTE* OFFSET;
 
 void send_warning(char* warn_msg);
 
-   //
-   // ARRAY-SPECIFIC FUNCTIONS: init_array and print_array
-   //
+//
+// ARRAY-SPECIFIC FUNCTIONS: init_array and print_array
+//
 
-int inizializza_array(BYTE* nome_array, int lunghezza_array);
+void inizializza_array(BYTE* nome_array, int lunghezza_array);
 
 int print_array(BYTE array_name[], int array_length);
 
 
-   //
-   // BYTE_LIST-SPECIFIC FUNCTIONS: create_b_list, blist_add_element, 
-   //                               print_b_list, blist_get_element
-   //
+//
+// BYTE_LIST-SPECIFIC FUNCTIONS: create_b_list, blist_add_element, 
+//                               print_b_list, blist_get_element
+//
 
 BYTE_LIST* create_b_list();
 
@@ -90,10 +90,10 @@ BYTE blist_get_element(BYTE_LIST* list, int position);
 int blist_set_element(BYTE_LIST* list, int position, BYTE new_content);
 
 
-   //
-   // RECORD-SPECIFIC FUNCTIONS: create_rec_list, reclist_add_element, 
-   //                            print_rec_list, reclist_get_element
-   //
+//
+// RECORD-SPECIFIC FUNCTIONS: create_rec_list, reclist_add_element, 
+//                            print_rec_list, reclist_get_element
+//
 
 REC_LIST* create_rec_list();
 

@@ -42,7 +42,7 @@ void indent(FILE* output_file, int indent_level);
 
 //PRIVATE
 void write_tag(FILE* output_file, int indent_level,
-	       char* tag_name, int closure_tag);
+               char* tag_name, int closure_tag);
 
 //PRIVATE
 RESPONSE* get_SWs_from_resp (RESPONSE* resp);
@@ -52,14 +52,14 @@ RESPONSE* clean_resp_from_SWs (RESPONSE* resp);
 
 //PRIVATE
 void xml_convert_ef_transp(FILE* file_to_write, int indent_level,
-			   TREE_NODE_TYPE* node);
+                           TREE_NODE_TYPE* node);
 
 //PRIVATE
 void xml_convert_ef_linfixcyc(FILE* file_to_write, int indent_level,
-			      TREE_NODE_TYPE* node, int linfix);
+                              TREE_NODE_TYPE* node, int linfix);
 
 //PRIVATE
 void xml_convert_tree(FILE* file_to_write, TREE_NODE_TYPE* tree,
-		      int indent_level);
+                      int indent_level);
 
 int create_xml_results(FILE* results_file, SIM_CARD* sim_card);

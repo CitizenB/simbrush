@@ -15,10 +15,12 @@
  *
  *****************************************************************************/
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "bail.h"
 #include "utils.h"
 #include "gsm-constants.h"
 #include "pcsc-wrappers.h"
@@ -39,7 +41,7 @@
 //   exits.
 //
 // NOTES:
-//   - For the pcsclite manual is not complete on values retuned by its API
+//   - For the pcsclite manual is not complete on values returned by its API
 //     functions, further cases may be included in the switch(rv) in the
 //     future.
 //
@@ -52,16 +54,14 @@ SCARDCONTEXT SIM_Establish_Context(DWORD dwScope) {
 
   switch (rv) {
     case SCARD_E_INVALID_VALUE: {
-      perror(strcat("SIM_Establish_Context:",ERR_INVALID_SCOPE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Establish_Context:",ERR_INVALID_SCOPE);
     }
     case SCARD_S_SUCCESS: {
       printf("Context has been successfully established.\n");
       return(hContext);
     }
     default: {
-      perror(strcat("SIM_Establish_Context:",ERR_WRONG_RETURN_VALUE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Establish_Context:",ERR_WRONG_RETURN_VALUE);
     }
   }
 
@@ -87,16 +87,14 @@ void SIM_Release_Context(SCARDCONTEXT hContext) {
   rv = SCardReleaseContext(hContext);
   switch(rv) {
     case SCARD_E_INVALID_HANDLE: {
-      perror(strcat("SIM_Release_Context:",ERR_INVALID_CONTEXT_HANDLER));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Release_Context:",ERR_INVALID_CONTEXT_HANDLER);
     }
     case SCARD_S_SUCCESS: {
       printf("Context has been successfully released.\n");
       break;
     }
     default:  {
-      perror(strcat("SIM_Release_Context:",ERR_WRONG_RETURN_VALUE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Release_Context:",ERR_WRONG_RETURN_VALUE);
     }
   }
 }
@@ -135,20 +133,17 @@ LPSTR Detect_Readers(SCARDCONTEXT hContext) {
 
   switch (rv) {
     case SCARD_E_INVALID_HANDLE: {
-      perror(strcat("Detect_Readers:",ERR_INVALID_SCOPE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "Detect_Readers:",ERR_INVALID_SCOPE);
     }
     case SCARD_E_INSUFFICIENT_BUFFER: {
-      perror(strcat("Detect_Readers:",ERR_INSUFFICIENT_BUFFER));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "Detect_Readers:",ERR_INSUFFICIENT_BUFFER);
     }
     case SCARD_S_SUCCESS: {
       printf("Active readers detected: %s. \n",mszReaders);
       return(mszReaders);
     }
     default: {
-      perror(strcat("Detect_Readers:",ERR_WRONG_RETURN_VALUE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "Detect_Readers:",ERR_WRONG_RETURN_VALUE);
     }
   }
 }
@@ -182,38 +177,32 @@ SCARDHANDLE SIM_Connect(SCARDCONTEXT hContext, LPSTR szReader) {
   rv = SCardConnect(hContext, szReader, SCARD_SHARE_SHARED, SCARD_PROTOCOL_T0, &hCard, &dwActiveProtocol);
   switch(rv) {
     case SCARD_E_NOT_READY: {
-      perror(strcat("SIM_Connect:",ERR_PORT_NOT_READY));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Connect:",ERR_PORT_NOT_READY);
     }
     case SCARD_E_INVALID_VALUE: {
-      perror(strcat("SIM_Connect:",ERR_INVALID_PARAMETER_VALUE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Connect:",ERR_INVALID_PARAMETER_VALUE);
     }
     case SCARD_E_READER_UNAVAILABLE: {
-      perror(strcat("SIM_Connect:",ERR_READER_UNAVAILABLE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Connect:",ERR_READER_UNAVAILABLE);
     }
     case SCARD_E_UNSUPPORTED_FEATURE: {
-      perror(strcat("SIM_Connect:",ERR_PROTOCOL_UNAVAILABLE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Connect:",ERR_PROTOCOL_UNAVAILABLE);
     }
     case SCARD_E_SHARING_VIOLATION: {
-      perror(strcat("SIM_Connect:",ERR_SHARING_VIOLATION));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Connect:",ERR_SHARING_VIOLATION);
     }
     case SCARD_E_INVALID_HANDLE: {
-      perror(strcat("SIM_Connect:",ERR_INVALID_CONTEXT_HANDLER));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Connect:",ERR_INVALID_CONTEXT_HANDLER);
     }
     case SCARD_S_SUCCESS: {
       printf("Connection with SIM card opened successfully.\n");
       return(hCard);
     }
     default: {
-      perror(strcat("SIM_Connect:",ERR_WRONG_RETURN_VALUE));
+      int errno_saved = errno;
       printf("The card returned: %li.\n",rv);
       printf("Suggestion: maybe card name was mistyped.\n");
-      exit(EXIT_FAILURE);
+      bail_with_errno(EXIT_FAILURE, errno_saved, "SIM_Connect:",ERR_WRONG_RETURN_VALUE);
     }
   }
 }
@@ -239,20 +228,17 @@ void SIM_Disconnect(SCARDHANDLE hCard) {
   rv = SCardDisconnect(hCard, SCARD_UNPOWER_CARD);
   switch(rv) {
     case SCARD_E_INVALID_HANDLE: {
-      perror(strcat("SIM_Disconnect:",ERR_INVALID_CONTEXT_HANDLER));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Disconnect:",ERR_INVALID_CONTEXT_HANDLER);
     }
     case SCARD_E_INVALID_VALUE: {
-      perror(strcat("SIM_Disconnect:",ERR_INVALID_DIRECTIVE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Disconnect:",ERR_INVALID_DIRECTIVE);
     }
     case SCARD_S_SUCCESS: {
       printf("SIM card connection successfully released.\n");
       break;
     }
     default: {
-      perror(strcat("SIM_Disconnect:",ERR_WRONG_RETURN_VALUE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Disconnect:",ERR_WRONG_RETURN_VALUE);
     }
   }
 }
@@ -277,27 +263,21 @@ RESPONSE* SIM_Status(SCARDHANDLE hCard) {
   DWORD pcchReaderLen, dwState, dwProtocol;
   BYTE pbAtr[MAX_ATR_SIZE];
   DWORD pcbAtrLen;
-  LPSTR lettori;
 
-  int i;
-  RESPONSE* resp;
-
-  lettori = (LPSTR)malloc(sizeof(char)*50);
-  pcchReaderLen = 50;
+  int const buf_size = 1024;
+  LPSTR lettori = (LPSTR)malloc(sizeof(char) * buf_size);
+  pcchReaderLen = buf_size;
   
   rv = SCardStatus(hCard, lettori, &pcchReaderLen, &dwState, &dwProtocol, pbAtr, &pcbAtrLen);
   switch(rv) {
     case SCARD_E_READER_UNAVAILABLE: {
-      perror(strcat("SIM_Status:",ERR_READER_REMOVED));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Status:", ERR_READER_REMOVED);
     }
     case SCARD_E_INSUFFICIENT_BUFFER: {
-      perror(strcat("SIM_Status:",ERR_INSUFFICIENT_BUFFER));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Status:",ERR_INSUFFICIENT_BUFFER);
     }
     case SCARD_E_INVALID_HANDLE: {
-      perror(strcat("SIM_Status:",ERR_INVALID_CONTEXT_HANDLER));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Status:",ERR_INVALID_CONTEXT_HANDLER);
     }
     case SCARD_S_SUCCESS: {
       printf("\n\nCARD STATUS = :\n");
@@ -350,7 +330,8 @@ RESPONSE* SIM_Status(SCARDHANDLE hCard) {
       print_array(pbAtr,pcbAtrLen);
       printf("\n\nATR length = %i.\n",pcbAtrLen);
 
-      resp = create_b_list();
+      RESPONSE* resp = create_b_list();
+      int i;
       for(i=0; i<pcbAtrLen; i++) {
         blist_add_element(resp,pbAtr[i]);
       }
@@ -358,9 +339,9 @@ RESPONSE* SIM_Status(SCARDHANDLE hCard) {
       return(resp);
     }
     default: {
-      perror(strcat("SIM_Status:",ERR_WRONG_RETURN_VALUE));
+      int errno_saved = errno;
       printf("\nValue returned =  %.2X\n",rv);
-      exit(EXIT_FAILURE);
+      bail_with_errno(EXIT_FAILURE, errno_saved, "SIM_Status:",ERR_WRONG_RETURN_VALUE);
     }
   }
 }
@@ -386,24 +367,20 @@ void SIM_Begin_Transaction(SCARDHANDLE hCard) {
   rv = SCardBeginTransaction(hCard);
   switch(rv) {
     case SCARD_E_READER_UNAVAILABLE: {
-      perror(strcat("SIM_Begin_Transaction:",ERR_READER_REMOVED));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Begin_Transaction:",ERR_READER_REMOVED);
     }
     case SCARD_E_SHARING_VIOLATION: {
-      perror(strcat("SIM_Begin_Transaction:",ERR_SHARING_VIOLATION));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Begin_Transaction:",ERR_SHARING_VIOLATION);
     }
     case SCARD_E_INVALID_HANDLE: {
-      perror(strcat("SIM_Begin_Transaction:",ERR_INVALID_CONTEXT_HANDLER));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Begin_Transaction:",ERR_INVALID_CONTEXT_HANDLER);
     }
     case SCARD_S_SUCCESS: {
       printf("TRANSACTION SUCCESSFULLY OPENED...\n");
       break;
     }
     default: {
-      perror(strcat("SIM_Begin_Transaction:",ERR_WRONG_RETURN_VALUE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_Begin_Transaction:",ERR_WRONG_RETURN_VALUE);
     }
   }
 }
@@ -433,24 +410,20 @@ void SIM_End_Transaction(SCARDHANDLE hCard) {
   rv = SCardEndTransaction(hCard, SCARD_LEAVE_CARD);
   switch(rv) {
     case SCARD_E_READER_UNAVAILABLE: {
-      perror(strcat("SIM_End_Transaction:",ERR_READER_REMOVED));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_End_Transaction:",ERR_READER_REMOVED);
     }
     case SCARD_E_SHARING_VIOLATION: {
-      perror(strcat("SIM_End_Transaction:",ERR_SHARING_VIOLATION));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_End_Transaction:",ERR_SHARING_VIOLATION);
     }
     case SCARD_E_INVALID_HANDLE: {
-      perror(strcat("SIM_End_Transaction:",ERR_INVALID_CONTEXT_HANDLER));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_End_Transaction:",ERR_INVALID_CONTEXT_HANDLER);
     }
     case SCARD_S_SUCCESS: {
       printf("TRANSACTION SUCCESSFULLY CLOSED.\n");
       break;
     }
     default: {
-      perror(strcat("SIM_End_Transaction:",ERR_WRONG_RETURN_VALUE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SIM_End_Transaction:",ERR_WRONG_RETURN_VALUE);
     }
   }
 }
@@ -474,7 +447,7 @@ void SIM_End_Transaction(SCARDHANDLE hCard) {
 //   Returns a pointer to the raw response to the SELECT command from the card.
 //
 // NOTES:
-//   - For the pcsclite manual is not complete on values retuned by its API
+//   - For the pcsclite manual is not complete on values returned by its API
 //     functions, further cases may be included in the switch(rv) in the
 //     future.
 //   - Error handling is up to this function: every time something goes wrong,
@@ -497,7 +470,7 @@ RESPONSE* gsm_select(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
   RESPONSE* response = create_b_list();
   
   if ((id_file < 0x0000) || (id_file > 0xFFFF)) {
-    perror(strcat("gsm_select: ","id_file passed was out of range. It must remain into the interval 0x0000 - 0xFFFF"));
+    bail(EXIT_FAILURE, "gsm_select: ","id_file passed was out of range. It must remain into the interval 0x0000 - 0xFFFF");
     exit(EXIT_FAILURE);
   }
 
@@ -505,32 +478,25 @@ RESPONSE* gsm_select(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
                      &pioRecvPci, pbRecvBuffer, &pcbRecvLength);
   switch(rv) {
     case SCARD_E_NOT_TRANSACTED: {
-      perror(strcat("SCardTransmit:", ERR_APDU_EXCHANGE_FAILED));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SCardTransmit:", ERR_APDU_EXCHANGE_FAILED);
     }
     case SCARD_E_INVALID_VALUE: {
-      perror(strcat("SCardTransmit", ERR_INVALID_PARAMETER_VALUE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SCardTransmit", ERR_INVALID_PARAMETER_VALUE);
     }
     case SCARD_E_READER_UNAVAILABLE: {
-      perror(strcat("SCardTransmit", ERR_READER_UNAVAILABLE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SCardTransmit", ERR_READER_UNAVAILABLE);
     }
     case SCARD_E_PROTO_MISMATCH: {
-      perror(strcat("SCardTransmit", ERR_PROTOCOL_DIFFERENT));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SCardTransmit", ERR_PROTOCOL_DIFFERENT);
     }
     case SCARD_W_RESET_CARD: {
-      perror(strcat("SCardTransmit", ERR_CARD_RESET));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SCardTransmit", ERR_CARD_RESET);
     }
     case SCARD_W_REMOVED_CARD: {
-      perror(strcat("SCardTransmit", ERR_CARD_REMOVED));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SCardTransmit", ERR_CARD_REMOVED);
     }
     case SCARD_E_INVALID_HANDLE: {
-      perror(strcat("SCardTransmit", ERR_INVALID_CONTEXT_HANDLER));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SCardTransmit", ERR_INVALID_CONTEXT_HANDLER);
     }
     case SCARD_S_SUCCESS: { //DEBUG
       //printf("APDU SELECT successfully transmitted.\n");
@@ -546,8 +512,7 @@ RESPONSE* gsm_select(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
 
     }
     default: {
-      perror(strcat("SCardTransmit", ERR_WRONG_RETURN_VALUE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SCardTransmit", ERR_WRONG_RETURN_VALUE);
     }
   }
 
@@ -556,7 +521,7 @@ RESPONSE* gsm_select(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
   }
 
   if((*response).b_list_length != pcbRecvLength) {
-    perror(strcat("gsm_select: ", PEB_WRONG_LIST_LENGTH));
+    bail(EXIT_FAILURE, "gsm_select: ", PEB_WRONG_LIST_LENGTH);
     exit(EXIT_FAILURE);
   }
   
@@ -582,7 +547,7 @@ RESPONSE* gsm_select(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
 //   Returns a pointer to the raw response to GET RESPONSE from the card.
 //
 // NOTES:
-//   - For the pcsclite manual is not complete on values retuned by its API
+//   - For the pcsclite manual is not complete on values returned by its API
 //     functions, further cases may be included in the switch(rv) in the
 //     future.
 //   - Error handling is up to this function: every time something goes wrong,
@@ -608,7 +573,7 @@ RESPONSE* gsm_get_response(SCARDHANDLE hCard,
 
   switch(rv) {
     case SCARD_E_NOT_TRANSACTED: {
-      perror(strcat("SCardTransmit", ERR_APDU_EXCHANGE_FAILED));
+      int errno_saved = errno;
       printf("Summary of input data:\n");
       printf("SENT APDU GET RESPONSE: ");
       print_array(pbSendBuffer,(int)sizeof(pbSendBuffer));
@@ -617,31 +582,25 @@ RESPONSE* gsm_get_response(SCARDHANDLE hCard,
       print_array(pbRecvBuffer,pcbRecvLength);
       printf("\n");
       printf("Length of received response: %i.\n", pcbRecvLength);
-      exit(EXIT_FAILURE);
+      bail_with_errno(EXIT_FAILURE, errno_saved, "SCardTransmit", ERR_APDU_EXCHANGE_FAILED);
     }
     case SCARD_E_INVALID_VALUE: {
-      perror(strcat("SCardTransmit", ERR_INVALID_PARAMETER_VALUE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SCardTransmit", ERR_INVALID_PARAMETER_VALUE);
     }
     case SCARD_E_READER_UNAVAILABLE: {
-      perror(strcat("SCardTransmit", ERR_READER_UNAVAILABLE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SCardTransmit", ERR_READER_UNAVAILABLE);
     }
     case SCARD_E_PROTO_MISMATCH: {
-      perror(strcat("SCardTransmit", ERR_PROTOCOL_DIFFERENT));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SCardTransmit", ERR_PROTOCOL_DIFFERENT);
     }
     case SCARD_W_RESET_CARD: {
-      perror(strcat("SCardTransmit", ERR_CARD_RESET));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SCardTransmit", ERR_CARD_RESET);
     }
     case SCARD_W_REMOVED_CARD: {
-      perror(strcat("SCardTransmit", ERR_CARD_REMOVED));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SCardTransmit", ERR_CARD_REMOVED);
     }
     case SCARD_E_INVALID_HANDLE: {
-      perror(strcat("SCardTransmit", ERR_INVALID_CONTEXT_HANDLER));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SCardTransmit", ERR_INVALID_CONTEXT_HANDLER);
     }
     case SCARD_S_SUCCESS: {
       /*
@@ -659,9 +618,8 @@ RESPONSE* gsm_get_response(SCARDHANDLE hCard,
       break;
     }
     default: {
-      perror(strcat("SCardTransmit", ERR_WRONG_RETURN_VALUE));
       printf("The value returned is: %.2X",rv);
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "SCardTransmit", ERR_WRONG_RETURN_VALUE);
     }
   }
 
@@ -734,7 +692,7 @@ RESPONSE* gsm_verify_chv(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
 
   switch(rv) {
     case SCARD_E_NOT_TRANSACTED: {
-      perror(strcat("gsm_verify_chv: ", ERR_APDU_EXCHANGE_FAILED));
+      int errno_saved = errno;
       printf("Summary of input data:\n");
       printf("SENT APDU GET RESPONSE: ");
       print_array(pbSendBuffer,(int)sizeof(pbSendBuffer));
@@ -743,31 +701,25 @@ RESPONSE* gsm_verify_chv(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
       print_array(pbRecvBuffer,pcbRecvLength);
       printf("\n");
       printf("Length of received response: %i.\n", pcbRecvLength);
-      exit(EXIT_FAILURE);
+      bail_with_errno(EXIT_FAILURE, errno_saved, "gsm_verify_chv: ", ERR_APDU_EXCHANGE_FAILED);
     }
     case SCARD_E_INVALID_VALUE: {
-      perror(strcat("gsm_verify_chv: ", ERR_INVALID_PARAMETER_VALUE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_verify_chv: ", ERR_INVALID_PARAMETER_VALUE);
     }
     case SCARD_E_READER_UNAVAILABLE: {
-      perror(strcat("gsm_verify_chv: ", ERR_READER_UNAVAILABLE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_verify_chv: ", ERR_READER_UNAVAILABLE);
     }
     case SCARD_E_PROTO_MISMATCH: {
-      perror(strcat("gsm_verify_chv: ", ERR_PROTOCOL_DIFFERENT));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_verify_chv: ", ERR_PROTOCOL_DIFFERENT);
     }
     case SCARD_W_RESET_CARD: {
-      perror(strcat("gsm_verify_chv: ", ERR_CARD_RESET));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_verify_chv: ", ERR_CARD_RESET);
     }
     case SCARD_W_REMOVED_CARD: {
-      perror(strcat("gsm_verify_chv: ", ERR_CARD_REMOVED));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_verify_chv: ", ERR_CARD_REMOVED);
     }
     case SCARD_E_INVALID_HANDLE: {
-      perror(strcat("gsm_verify_chv: ", ERR_INVALID_CONTEXT_HANDLER));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_verify_chv: ", ERR_INVALID_CONTEXT_HANDLER);
     }
     case SCARD_S_SUCCESS: {
       printf("APDU VERIFY CHV successfully transmitted.\n");
@@ -784,9 +736,9 @@ RESPONSE* gsm_verify_chv(SCARDHANDLE hCard, SCARD_IO_REQUEST* dwActiveProtocol,
       break;
     }
     default: {
-      perror(strcat("gsm_verify_chv: ", ERR_WRONG_RETURN_VALUE));
+      int errno_saved = errno;
       printf("The value returned is: %.2X",rv);
-      exit(EXIT_FAILURE);
+      bail_with_errno(EXIT_FAILURE, errno_saved, "gsm_verify_chv: ", ERR_WRONG_RETURN_VALUE);
     }
   }
 
@@ -849,7 +801,7 @@ int gsm_transparent_file_readability (SCARDHANDLE hCard,
 //   Returns a pointer to the raw content of the specified file.
 //
 // NOTES:
-//   - For the pcsclite manual is not complete on values retuned by its API
+//   - For the pcsclite manual is not complete on values returned by its API
 //     functions, further cases may be included in the switch(rv) in the
 //     future.
 //   - Changes need to be implemented to manage transparent files bigger
@@ -882,7 +834,7 @@ RESPONSE* gsm_read_transparent_file (SCARDHANDLE hCard,
                      &pioRecvPci, pbRecvBuffer, &pcbRecvLength);
   switch(rv) {
     case SCARD_E_NOT_TRANSACTED: {
-      perror(strcat("gsm_read_transparent_file: ", ERR_APDU_EXCHANGE_FAILED));
+      int errno_saved = errno;
       printf("Summary of input data:\n");
       printf("SENT APDU GET RESPONSE: ");
       print_array(pbSendBuffer,(int)sizeof(pbSendBuffer));
@@ -891,31 +843,25 @@ RESPONSE* gsm_read_transparent_file (SCARDHANDLE hCard,
       print_array(pbRecvBuffer,pcbRecvLength);
       printf("\n");
       printf("Length of received response: %i.\n", pcbRecvLength);
-      exit(EXIT_FAILURE);
+      bail_with_errno(EXIT_FAILURE, errno_saved, "gsm_read_transparent_file: ", ERR_APDU_EXCHANGE_FAILED);
     }
     case SCARD_E_INVALID_VALUE: {
-      perror(strcat("gsm_read_transparent_file: ", ERR_INVALID_PARAMETER_VALUE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_read_transparent_file: ", ERR_INVALID_PARAMETER_VALUE);
     }
     case SCARD_E_READER_UNAVAILABLE: {
-      perror(strcat("gsm_read_transparent_file: ", ERR_READER_UNAVAILABLE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_read_transparent_file: ", ERR_READER_UNAVAILABLE);
     }
     case SCARD_E_PROTO_MISMATCH: {
-      perror(strcat("gsm_read_transparent_file: ", ERR_PROTOCOL_DIFFERENT));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_read_transparent_file: ", ERR_PROTOCOL_DIFFERENT);
     }
     case SCARD_W_RESET_CARD: {
-      perror(strcat("gsm_read_transparent_file: ", ERR_CARD_RESET));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_read_transparent_file: ", ERR_CARD_RESET);
     }
     case SCARD_W_REMOVED_CARD: {
-      perror(strcat("gsm_read_transparent_file: ", ERR_CARD_REMOVED));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_read_transparent_file: ", ERR_CARD_REMOVED);
     }
     case SCARD_E_INVALID_HANDLE: {
-      perror(strcat("gsm_read_transparent_file: ", ERR_INVALID_CONTEXT_HANDLER));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_read_transparent_file: ", ERR_INVALID_CONTEXT_HANDLER);
     }
     case SCARD_S_SUCCESS: {
       printf("APDU GET RESPONSE successfully transmitted.\n");
@@ -930,9 +876,9 @@ RESPONSE* gsm_read_transparent_file (SCARDHANDLE hCard,
       break;
     }
     default: {
-      perror(strcat("gsm_read_transparent_file: ", ERR_WRONG_RETURN_VALUE));
+      int errno_saved = errno;
       printf("The value returned is: %.2X",rv);
-      exit(EXIT_FAILURE);
+      bail_with_errno(EXIT_FAILURE, errno_saved, "gsm_read_transparent_file: ", ERR_WRONG_RETURN_VALUE);
     }
   }
 
@@ -969,7 +915,7 @@ RESPONSE* gsm_read_transparent_file (SCARDHANDLE hCard,
 //   Returns a pointer to the raw content of the specified file.
 //
 // NOTES:
-//   - For the pcsclite manual is not complete on values retuned by its API
+//   - For the pcsclite manual is not complete on values returned by its API
 //     functions, further cases may be included in the switch(rv) in the
 //     future.
 //   - Changes need to be implemented to manage transparent files bigger
@@ -979,12 +925,8 @@ REC_RESPONSE* gsm_read_linear_fixed_file (SCARDHANDLE hCard,
                                           SCARD_IO_REQUEST* dwActiveProtocol,
                                           int file_size,
                                           BYTE record_dim) {
-
-  int i;
-  REC_RESPONSE* response = create_rec_list();
-  int block_num = file_size % record_dim; //In this statement block_num is used
-                                          //as a support variabile to trace
-                                          //erroneous situations
+  //In this statement block_num is used as a support variable to trace erroneous situations
+  int block_num = file_size % record_dim;
 
   if(block_num != 0)
     printf("DEBUG: gsm_read_linear_fixed_file: file_size/record_size mismatch.");
@@ -994,13 +936,13 @@ REC_RESPONSE* gsm_read_linear_fixed_file (SCARDHANDLE hCard,
   // call gsm_read_record block_num times to get the whole content of the file.
   
   // Records are extracted from number 1 to last record.
+  REC_RESPONSE* response = create_rec_list();
+  int i;
   for(i=1; i<=block_num; i++) {
     // Records are added to the list one at a time. Here the GSM primitive
     // READ RECORD is invoked with mode=0x04 that is with an absolute reference
     // to the record number
-    reclist_add_element(response,
-                        gsm_read_record(hCard, dwActiveProtocol,
-                                        i, 0x04, record_dim));
+    reclist_add_element(response, gsm_read_record(hCard, dwActiveProtocol, i, 0x04, record_dim));
   }
 
   return(response);
@@ -1030,7 +972,7 @@ REC_RESPONSE* gsm_read_linear_fixed_file (SCARDHANDLE hCard,
 //   Returns a pointer to the raw content of the specified file.
 //
 // NOTES:
-//   - For the pcsclite manual is not complete on values retuned by its API
+//   - For the pcsclite manual is not complete on values returned by its API
 //     functions, further cases may be included in the switch(rv) in the
 //     future.
 //   - The output is arranged such that the first record of the list is the
@@ -1124,7 +1066,7 @@ RESPONSE* gsm_read_record (SCARDHANDLE hCard,
                      &pioRecvPci, pbRecvBuffer, &pcbRecvLength);
   switch(rv) {
     case SCARD_E_NOT_TRANSACTED: {
-      perror(strcat("gsm_read_record: ", ERR_APDU_EXCHANGE_FAILED));
+      int errno_saved = errno;
       printf("Summary of input data:\n");
       printf("SENT APDU GET RESPONSE: ");
       print_array(pbSendBuffer,(int)sizeof(pbSendBuffer));
@@ -1133,31 +1075,25 @@ RESPONSE* gsm_read_record (SCARDHANDLE hCard,
       print_array(pbRecvBuffer,pcbRecvLength);
       printf("\n");
       printf("Length of received response: %i.\n", pcbRecvLength);
-      exit(EXIT_FAILURE);
+      bail_with_errno(EXIT_FAILURE, errno_saved, "gsm_read_record: ", ERR_APDU_EXCHANGE_FAILED);
     }
     case SCARD_E_INVALID_VALUE: {
-      perror(strcat("gsm_read_record: ", ERR_INVALID_PARAMETER_VALUE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_read_record: ", ERR_INVALID_PARAMETER_VALUE);
     }
     case SCARD_E_READER_UNAVAILABLE: {
-      perror(strcat("gsm_read_record: ", ERR_READER_UNAVAILABLE));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_read_record: ", ERR_READER_UNAVAILABLE);
     }
     case SCARD_E_PROTO_MISMATCH: {
-      perror(strcat("gsm_read_record: ", ERR_PROTOCOL_DIFFERENT));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_read_record: ", ERR_PROTOCOL_DIFFERENT);
     }
     case SCARD_W_RESET_CARD: {
-      perror(strcat("gsm_read_record: ", ERR_CARD_RESET));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_read_record: ", ERR_CARD_RESET);
     }
     case SCARD_W_REMOVED_CARD: {
-      perror(strcat("gsm_read_record: ", ERR_CARD_REMOVED));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_read_record: ", ERR_CARD_REMOVED);
     }
     case SCARD_E_INVALID_HANDLE: {
-      perror(strcat("gsm_read_record: ", ERR_INVALID_CONTEXT_HANDLER));
-      exit(EXIT_FAILURE);
+      bail(EXIT_FAILURE, "gsm_read_record: ", ERR_INVALID_CONTEXT_HANDLER);
     }
     case SCARD_S_SUCCESS: {
       /*
@@ -1175,9 +1111,9 @@ RESPONSE* gsm_read_record (SCARDHANDLE hCard,
       break;
     }
     default: {
-      perror(strcat("gsm_read_record: ", ERR_WRONG_RETURN_VALUE));
+      int errno_saved = errno;
       printf("The value returned is: %.2X",rv);
-      exit(EXIT_FAILURE);
+      bail_with_errno(EXIT_FAILURE, errno_saved, "gsm_read_record: ", ERR_WRONG_RETURN_VALUE);
     }
   }
 
